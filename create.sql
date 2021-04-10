@@ -6,6 +6,7 @@ create table people (
 drop table if exists companies cascade;
 create table companies (
 	id numeric(5) constraint pk_com primary key,
+	company_name varchar(200) not null unique,
 	main_country varchar(100),
 	annual_revenue numeric(9, 4)
 );

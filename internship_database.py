@@ -9,7 +9,9 @@ def initializeDatabase():
                             password='12zuhabo')
     cursor = conn.cursor()
     cursor.execute(open("create.sql", "r").read())
-    cursor.execute(open("generated-data.sql").read())
+    gd = open("generated-data.sql").read()
+    if len(gd) > 0:
+        cursor.execute(gd)
     return cursor
 
 

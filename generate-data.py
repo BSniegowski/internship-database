@@ -1,7 +1,10 @@
 from internship_database import *
 import random
+import numpy as np
 
 initializeDatabase()
+with open("generated-data.sql", "w") as clear_up:
+    clear_up.write("")
 
 
 def generate_people(amount):
@@ -18,8 +21,30 @@ def generate_people(amount):
 
     with open("generated-data.sql", "a") as gd:
         for i in range(amount):
-            max_id = max_id + 1
+            max_id += 1
             gd.write("insert into people (id, name) values (" + str(max_id) + ", '" + getRandomName() + "');\n")
 
 
-generate_people(1)
+countries = open("countries.txt", "r").read().split('\n')
+
+
+def randomCountry():
+    return countries[random.randrange(len(countries))]
+
+
+def randomRevenue():
+    return round(np.random.uniform(0, 1) * 100000.0, 4)
+
+
+def add_companies():
+    # companies = getQueryResult('select * from companies;')
+    id = 0
+    with open("generated-data.sql", "a") as gd:
+        for company in open("companies.txt", "r").read().split('\n'):
+            gd.write("insert into companies (id, company_name, main_country, annual_revenue) values ("
+                     + str(id) + ", '" + company.replace("'", "") + "', '" + randomCountry() + "', " +
+                     str(randomRevenue()) + ");\n")
+            id += 1
+
+
+add_companies()
