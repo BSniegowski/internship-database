@@ -99,15 +99,24 @@ create table jobs (
 );
 
 create table recommendations (
+-- fix:
     recommender numeric(5) constraint fk_rec_ppl references people(id),
-    -- actually implied by job_id: recommended numeric(5) constraint fk_rec_ppl_2 references people(id),
-    job_id numeric(5) constraint fk_rec_j references jobs(job_id),
-    primary key (job_id,recommender) -- do we allow multiple recommenders for one job_id?
+    recommended numeric(5) constraint fk_rec_ppl_2 references people(id),
+    role_id numeric(5) constraint fk_rec_r references roles(role_id),
+    time_of_recommendation date NOT NULL,
+    primary key (recommender,recommended,role_id,time_of_recommendation),
+    CHECK ( recommender != recommended )
+    -- check if not already employed on role_id
+    -- check if recommender has ever worked in company
+
+--     recommender numeric(5) constraint fk_rec_ppl references people(id),
+--     -- actually implied by job_id: recommended numeric(5) constraint fk_rec_ppl_2 references people(id),
+--     job_id numeric(5) constraint fk_rec_j references jobs(job_id),
+--     primary key (job_id,recommender) -- do we allow multiple recommenders for one job_id?
 
 --     check employee(job_id) != recommender (nie mozna polecac samego siebie)
---     check if recommender has ever worked in company(job_id)
 );
-create table promotions ( -- some extra money for recommender when recommended is employed/ (alternatively works for example for 2 years)
+create table promotions ( -- some extra money for recommender if recommended is employed/ (alternatively works for example for 2 years)
     id numeric(5) constraint pk_pro primary key,
     role_id numeric(5) constraint fk_pro_r references roles(role_id),
     start_of_promotion date NOT NULL,
