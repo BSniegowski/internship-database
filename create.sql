@@ -2,7 +2,8 @@ drop table if exists people cascade;
 drop table if exists residence cascade;
 drop table if exists companies cascade;
 drop table if exists universities cascade;
-drop table if exists majors cascade;--specjalnosci/kierunki studiow
+drop table if exists fields_of_study cascade;
+drop table if exists majors cascade;
 drop table if exists education cascade;
 drop table if exists contacts cascade;
 drop table if exists roles cascade;
@@ -35,11 +36,16 @@ create table universities (
     name varchar(100) NOT NULL,
     city varchar(100) NOT NULL
 );
-
-create table majors (
+create table fields_of_study ( --possible types
+    id numeric(3) constraint pk_fie primary key,
+    name varchar(100) NOT NULL
+);
+create table majors ( -- particular field at given university
     id numeric(5) constraint pk_maj primary key,
     university_id numeric(5) constraint fk_maj_uni references universities(id),
-    name varchar(100) NOT NULL
+    field_id numeric(3) constraint fk_maj_fie references fields_of_study(id)
+    -- should (university_id,field_id) be unique?
+    -- if not, add info varchar(100) for example: this one is at faculty of ... / or this one is more practical ...
 );
 
 create table education (
@@ -109,12 +115,6 @@ create table recommendations (
     -- check if not already employed on role_id
     -- check if recommender has ever worked in company
 
---     recommender numeric(5) constraint fk_rec_ppl references people(id),
---     -- actually implied by job_id: recommended numeric(5) constraint fk_rec_ppl_2 references people(id),
---     job_id numeric(5) constraint fk_rec_j references jobs(job_id),
---     primary key (job_id,recommender) -- do we allow multiple recommenders for one job_id?
-
---     check employee(job_id) != recommender (nie mozna polecac samego siebie)
 );
 create table promotions ( -- some extra money for recommender if recommended is employed/ (alternatively works for example for 2 years)
     id numeric(5) constraint pk_pro primary key,
