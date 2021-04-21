@@ -125,8 +125,3 @@ create table promotions ( -- some extra money for recommender if recommended is 
     CHECK ( end_of_promotion > start_of_promotion ),
     CHECK ( premium > 0 )
 );
-
-insert into people (id, name) values (1, 'Pavel Sankin');
-insert into people (id, name) values (2, 'Andrei Daletski');
-insert into contacts (id, linkedin, github, email) values (1, 'https://www.linkedin.com/in/pavel-sankin-bbaa371bb/', 'github.com/Pankin610', 'pavelsankin610@gmail.com');
-insert into contacts (id, linkedin, github) values (2, 'https://www.linkedin.com/in/andrei-daletski-490b29205/', 'github.com/DANDROZAVR');

@@ -4,15 +4,16 @@ import numpy as np
 from faker import Faker
 
 fake = Faker()
-
 initializeDatabase()
-with open("generated-data.sql", "w") as clear_up:
-    clear_up.write("")
 
 
-def generate_people(amount):
-    max_id = getQueryResult('select max(id) from people;')
-    max_id = max_id[0][0]
+def clearFile(filename):
+    with open(filename, "w") as clear_up:
+        clear_up.write("")
+
+
+def generatePeople(amount):
+    max_id = 0
 
     with open("first-names.txt", "r") as f_names, open("last-names.txt", "r") as l_names:
         first_names = [f_names.readline().strip() for i in range(1000)]
@@ -22,6 +23,7 @@ def generate_people(amount):
         return first_names[random.randrange(len(first_names))] + ' ' + \
                last_names[random.randrange(len(last_names))]
 
+    clearFile("insert_people.sql")
     with open("insert_people.sql", "a") as gd:
         for i in range(amount):
             max_id += 1
@@ -39,9 +41,10 @@ def randomRevenue():
     return round(np.random.uniform(0, 1) * 100000.0, 4)
 
 
-def add_companies():
+def addCompanies():
     id = 0
-    with open("generated-data.sql", "a") as gd:
+    clearFile("insert_companies.sql")
+    with open("insert_companies.sql", "a") as gd:
         for company in open("companies.txt", "r").read().split('\n'):
             gd.write("insert into companies (id, company_name, main_country, annual_revenue) values ("
                      + str(id) + ", '" + company.replace("'", "") + "', '" + randomCountry() + "', " +
@@ -54,27 +57,31 @@ def getRandomDate(start='-30y'):
 
 
 def randomListValue(list):
-    return list[random.randrange(len(countries))]
+    return list[random.randrange(len(list))]
 
 
-def add_roles(amount):
-    role_names = []
-    for name in open("role_names.txt", "r").read().split('\n'):
-        role_names.append(name)
-    possible_hours = [20, 30, 40, 60]
+def addRoles(amount):
+    role_names = [name for name in open("role_names.txt", "r").read().split('\n')]
+    possible_hours = [20, 30, 40, 60, 80]
     company_ids = getQueryResult('select id from companies;')
+    company_ids = [str(i[0]) for i in company_ids]
 
-    with open("insert_jobs.sql", "a") as roles:
+    clearFile("insert_roles.sql")
+    with open("insert_roles.sql", "a") as roles:
         for id in range(amount):
             role_name = randomListValue(role_names)
             hours = randomListValue(possible_hours)
             salary_min = randomRevenue()
             salary_max = randomRevenue()
+            company_id = randomListValue(company_ids)
             if salary_min > salary_max:
                 salary_min, salary_max = salary_max, salary_min
 
-            roles.write("insert into roles (role_id, role_name, company_id, hours, salary_range_min, salary_range_max)"
-                        "values (%s, %s, %s, %s, %s, %s)" % id, role_name, company_ids, hours, salary_min, salary_max)
+            roles.write("insert into roles (role_id, role_name, company_id, hours, salary_range_min, salary_range_max) "
+                        "values (%s, '%s', %s, %s, %s, %s);\n"
+                        % (id, role_name, company_id, hours, salary_min, salary_max))
 
 
-add_companies()
+addCompanies()
+generatePeople(5000)
+addRoles(50)
