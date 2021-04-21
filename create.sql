@@ -8,6 +8,7 @@ drop table if exists education cascade;
 drop table if exists contacts cascade;
 drop table if exists roles cascade;
 drop table if exists work_place cascade;
+drop table if exists work_places cascade;
 drop table if exists jobs cascade;
 drop table if exists recommendations cascade;
 drop table if exists promotions cascade;
@@ -80,7 +81,7 @@ create table roles (
     company_id numeric(5) constraint fk_r_com references companies(id)
 );
 
-create table work_place
+create table work_places
 (
     id            numeric(5) constraint pk_wp primary key,
     city          varchar(100) not null,
@@ -94,7 +95,7 @@ create table jobs (
 	--company_id numeric(5) constraint fk_j_com references companies(id),
 	role_id numeric(5) constraint fk_j_r references roles(role_id),
 	employee numeric(5) constraint fk_j_ppl references people(id),
-    location_id numeric(5) constraint fk_j_wp references work_place(id),
+    location_id numeric(5) constraint fk_j_wp references work_places(id),
 	job_id numeric(5) constraint pk_j primary key,
 	starting_date date not null,
 	ending_date date,
