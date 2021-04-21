@@ -1,0 +1,11 @@
+insert into fields_of_study (id, name) values (1, 'Theoretical Computer Science');
+insert into fields_of_study (id, name) values (2, 'Computer Information Systems');
+insert into fields_of_study (id, name) values (3, 'Information Technology');
+insert into fields_of_study (id, name) values (4, 'Information Science');
+insert into fields_of_study (id, name) values (5, 'Computer Systems Networking');
+insert into fields_of_study (id, name) values (6, 'Computer Software & Applications');
+insert into fields_of_study (id, name) values (7, 'Computer Programming');
+insert into fields_of_study (id, name) values (8, 'Computer Systems Analysis');
+insert into fields_of_study (id, name) values (9, 'Data Processing');
+insert into fields_of_study (id, name) values (10, 'Data Entry');
+insert into fields_of_study (id, name) values (11, 'Other Computer & Information Sciences');

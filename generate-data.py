@@ -15,7 +15,7 @@ def clearFile(filename):
 def generatePeople(amount):
     max_id = 0
 
-    with open("first-names.txt", "r") as f_names, open("last-names.txt", "r") as l_names:
+    with open("txt-data/first-names.txt", "r") as f_names, open("txt-data/last-names.txt", "r") as l_names:
         first_names = [f_names.readline().strip() for i in range(1000)]
         last_names = [l_names.readline().strip() for i in range(1000)]
 
@@ -23,14 +23,14 @@ def generatePeople(amount):
         return first_names[random.randrange(len(first_names))] + ' ' + \
                last_names[random.randrange(len(last_names))]
 
-    clearFile("insert_people.sql")
-    with open("insert_people.sql", "a") as gd:
+    clearFile("insert-data/insert_people.sql")
+    with open("insert-data/insert_people.sql", "a") as gd:
         for i in range(amount):
             max_id += 1
             gd.write("insert into people (id, name) values (" + str(max_id) + ", '" + getRandomName() + "');\n")
 
 
-countries = open("countries.txt", "r").read().split('\n')
+countries = open("txt-data/countries.txt", "r").read().split('\n')
 
 
 def randomCountry():
@@ -43,9 +43,9 @@ def randomRevenue():
 
 def addCompanies():
     id = 0
-    clearFile("insert_companies.sql")
-    with open("insert_companies.sql", "a") as gd:
-        for company in open("companies.txt", "r").read().split('\n'):
+    clearFile("insert-data/insert_companies.sql")
+    with open("insert-data/insert_companies.sql", "a") as gd:
+        for company in open("txt-data/companies.txt", "r").read().split('\n'):
             gd.write("insert into companies (id, company_name, main_country, annual_revenue) values ("
                      + str(id) + ", '" + company.replace("'", "") + "', '" + randomCountry() + "', " +
                      str(randomRevenue()) + ");\n")
@@ -61,13 +61,13 @@ def randomListValue(list):
 
 
 def addRoles(amount):
-    role_names = [name for name in open("role_names.txt", "r").read().split('\n')]
+    role_names = [name for name in open("txt-data/role_names.txt", "r").read().split('\n')]
     possible_hours = [20, 30, 40, 60, 80]
     company_ids = getQueryResult('select id from companies;')
     company_ids = [str(i[0]) for i in company_ids]
 
-    clearFile("insert_roles.sql")
-    with open("insert_roles.sql", "a") as roles:
+    clearFile("insert-data/insert_roles.sql")
+    with open("insert-data/insert_roles.sql", "a") as roles:
         for id in range(amount):
             role_name = randomListValue(role_names)
             hours = randomListValue(possible_hours)

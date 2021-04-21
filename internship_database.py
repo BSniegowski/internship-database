@@ -9,8 +9,9 @@ def initializeDatabase():
                             password='12zuhabo')
     cursor = conn.cursor()
     cursor.execute(open("create.sql", "r").read())
-    generate_files = ["insert_people.sql", "insert_companies.sql", "insert_fields.sql", "insert_universities.sql",
-                      "insert_roles.sql"]
+    generate_files = ["insert-data/insert_people.sql", "insert-data/insert_companies.sql",
+                      "insert-data/insert_fields.sql", "insert-data/insert_universities.sql",
+                      "insert-data/insert_roles.sql"]
     for file in generate_files:
         gd = open(file).read()
         if len(gd) > 0:
