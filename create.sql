@@ -17,6 +17,16 @@ create table people (
 	id numeric(5) constraint pk_ppl primary key,
 	name varchar(100) NOT NULL
 );
+
+create table contacts (
+	id numeric(5) constraint fk_c_ppl references people(id),
+	linkedin varchar(250) unique,
+	github varchar(250) unique,
+	email varchar(250) unique,
+    CHECK ( linkedin IS NOT NULL OR github IS NOT NULL OR email IS NOT NULL),
+    CHECK ( email IS NULL OR email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$')
+);
+
 create table residences (
     id numeric(5) constraint fk_res_ppl references people(id),
     city varchar(100) NOT NULL,
@@ -26,22 +36,17 @@ create table residences (
     CHECK ( street IS NOT NULL OR dwelling_number IS NOT NULL )
 );
 
-create table companies (
-	id numeric(5) constraint pk_com primary key,
-	company_name varchar(200) not null unique,
-	main_country varchar(100),
-	annual_revenue numeric(9, 4)
-);
-
 create table universities (
     id numeric(5) constraint pk_uni primary key,
     name varchar(100) NOT NULL,
     city varchar(100) NOT NULL
 );
+
 create table fields_of_study ( --possible types
     id numeric(3) constraint pk_fie primary key,
     name varchar(100) NOT NULL
 );
+
 create table majors ( -- particular field at given university
     id numeric(5) constraint pk_maj primary key,
     university_id numeric(5) constraint fk_maj_uni references universities(id),
@@ -60,13 +65,11 @@ create table educations (
     CHECK ( end_of_studying IS NULL OR end_of_studying > start_of_studying )
 );
 
-create table contacts (
-	id numeric(5) constraint fk_c_ppl references people(id),
-	linkedin varchar(250) unique,
-	github varchar(250) unique,
-	email varchar(250) unique,
-    CHECK ( linkedin IS NOT NULL OR github IS NOT NULL OR email IS NOT NULL),
-    CHECK ( email IS NULL OR email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$')
+create table companies (
+	id numeric(5) constraint pk_com primary key,
+	company_name varchar(200) not null unique,
+	main_country varchar(100),
+	annual_revenue numeric(9, 4)
 );
 
 create table roles (
