@@ -188,7 +188,7 @@ create table recommendations (
 );
 create table employee_search ( -- some extra money for recommender if recommended is employed
     id numeric(5) constraint pk_emp primary key,
-    company_id numeric(5) constraint fk_emp_r references companies(id),
+    role_id numeric(5) constraint fk_emp_r references roles(role_id),
     start_of_search date NOT NULL,
     end_of_search date NOT NULL,
     premium numeric(9)
