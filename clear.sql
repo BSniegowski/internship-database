@@ -10,5 +10,4 @@ drop table if exists roles cascade;
 drop table if exists work_places cascade;
 drop table if exists jobs cascade;
 drop table if exists recommendations cascade;
-drop table if exists promotions cascade;
 drop table if exists employee_search cascade;
