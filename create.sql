@@ -190,6 +190,6 @@ create table employee_search ( -- some extra money for recommender if recommende
     start_of_search date NOT NULL,
     end_of_search date NOT NULL,
     premium numeric(9,2)
-    CHECK ( end_of_search > start_of_search ),
+    CHECK ( end_of_search >= start_of_search ),
     CHECK ( premium > 0 )
 );
