@@ -61,7 +61,7 @@ create table educations (
     start_of_studying date NOT NULL,
     end_of_studying date,
     CHECK ( degree = 'none' OR degree = 'bachelor' OR degree = 'master' OR degree = 'PhD'),
-    CHECK ( end_of_studying IS NULL OR end_of_studying > start_of_studying )
+    CHECK ( end_of_studying > start_of_studying )
 );
 
 create table companies (
