@@ -30,9 +30,8 @@ create table residences (
     id numeric(5) constraint fk_res_ppl references people(id),
     city varchar(100) NOT NULL,
     street varchar(100),
-    dwelling_number numeric(5),
-    flat_number numeric(5),
-    CHECK ( street IS NOT NULL OR dwelling_number IS NOT NULL )
+    dwelling_number numeric(5) NOT NULL,
+    flat_number numeric(5)
 );
 
 create table universities (
