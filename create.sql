@@ -73,8 +73,8 @@ create table companies (
 create table roles (
     role_id numeric(5) constraint pk_r primary key,
     role_name varchar(100),
-    salary_range_min numeric(9),
-    salary_range_max numeric(9),
+    salary_range_min numeric(9,2),
+    salary_range_max numeric(9,2),
     hours numeric(2), --weekly ?
     company_id numeric(5) constraint fk_r_com references companies(id),
     CHECK ( salary_range_max >= salary_range_min )
@@ -109,7 +109,7 @@ create table jobs (
 	unique (role_id,employee,starting_date),
 
 	ending_date date,
-	salary numeric(9),
+	salary numeric(9,2),
 
     CHECK ( ending_date > starting_date),
     CHECK ( isInRange(salary,role_id) )
@@ -189,7 +189,7 @@ create table employee_search ( -- some extra money for recommender if recommende
     role_id numeric(5) constraint fk_emp_r references roles(role_id),
     start_of_search date NOT NULL,
     end_of_search date NOT NULL,
-    premium numeric(9)
+    premium numeric(9,2)
     CHECK ( end_of_search > start_of_search ),
     CHECK ( premium > 0 )
 );
