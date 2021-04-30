@@ -25,6 +25,7 @@ create table residences (
     flat_number numeric(5),
     CHECK ( street IS NOT NULL OR dwelling_number IS NOT NULL )
 );
+
 create table companies (
 	id numeric(5) constraint pk_com primary key,
 	company_name varchar(200) not null unique,
@@ -61,9 +62,9 @@ create table educations (
 
 create table contacts (
 	id numeric(5) constraint fk_c_ppl references people(id),
-	linkedin varchar(250),
-	github varchar(250),
-	email varchar(250),
+	linkedin varchar(250) unique,
+	github varchar(250) unique,
+	email varchar(250) unique,
     CHECK ( linkedin IS NOT NULL OR github IS NOT NULL OR email IS NOT NULL),
     CHECK ( email IS NULL OR email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$')
 );
