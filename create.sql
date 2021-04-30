@@ -1,15 +1,12 @@
 drop table if exists people cascade;
-drop table if exists residence cascade;
 drop table if exists residences cascade;
 drop table if exists companies cascade;
 drop table if exists universities cascade;
 drop table if exists fields_of_study cascade;
 drop table if exists majors cascade;
-drop table if exists education cascade;
 drop table if exists educations cascade;
 drop table if exists contacts cascade;
 drop table if exists roles cascade;
-drop table if exists work_place cascade;
 drop table if exists work_places cascade;
 drop table if exists jobs cascade;
 drop table if exists recommendations cascade;
@@ -180,10 +177,9 @@ create table recommendations (
     unique (recommender,recommended,role_id,time_of_recommendation),
     CHECK ( recommender != recommended ),
 
-    -- NOT tested
     CHECK ( notEmployedThen(time_of_recommendation,recommended,role_id)),
     CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
-        --need role_id to determine if recommender worked in company(role_id)
+        --need role_id to determine if recommender worked in company of role_id
 
 );
 create table employee_search ( -- some extra money for recommender if recommended is employed
