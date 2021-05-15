@@ -1,9 +1,13 @@
 drop table if exists people cascade;
+drop table if exists residences cascade;
 drop table if exists companies cascade;
+drop table if exists universities cascade;
+drop table if exists fields_of_study cascade;
 drop table if exists majors cascade;
-drop table if exists education cascade;
+drop table if exists educations cascade;
 drop table if exists contacts cascade;
 drop table if exists roles cascade;
-drop table if exists work_place cascade;
+drop table if exists work_places cascade;
 drop table if exists jobs cascade;
 drop table if exists recommendations cascade;
+drop table if exists employee_search cascade;
