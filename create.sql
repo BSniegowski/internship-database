@@ -87,10 +87,11 @@ create table roles (
     role_id integer constraint pk_r primary key,
     salary_range_min numeric(9,2),
     salary_range_max numeric(9,2),
-    hours numeric(2),
+    hours int2 NOT NULL,
     company_id integer constraint fk_r_com references companies(id),
     position_id integer constraint fk_r_pos references positions(id),
-    CHECK ( salary_range_max >= salary_range_min )
+    CHECK ( salary_range_max >= salary_range_min ),
+    CHECK ( hours > 0 AND hours <= 80 )
 );
 
 create table work_places (
