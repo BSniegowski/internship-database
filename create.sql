@@ -45,7 +45,7 @@ create table residences (
 create table universities (
     id integer constraint pk_uni primary key,
     name varchar(100) NOT NULL,
-    city_id integer constraint fk_res_cit references cities(id)
+    city_id integer constraint fk_uni_cit references cities(id)
 );
 
 create table fields_of_study ( --possible types
@@ -74,7 +74,7 @@ create table educations (
 create table companies (
 	id integer constraint pk_com primary key,
 	company_name varchar(200) not null unique,
-	headquarters integer constraint fk_res_cit references cities(id),
+	headquarters integer constraint fk_com_cit references cities(id),
 	annual_revenue numeric(9,2)
 );
 
@@ -95,7 +95,8 @@ create table roles (
 
 create table work_places (
     id integer constraint pk_wp primary key,
-    city_id integer constraint fk_res_cit references cities(id),
+    city_id integer constraint fk_wp_cit references cities(id),
+    company_id integer constraint fk_wp_com references companies(id),
     street varchar(100),
     street_number int2,
     opening_hours time,
