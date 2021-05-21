@@ -48,12 +48,12 @@ create table universities (
     city_id integer constraint fk_uni_cit references cities(id)
 );
 
-create table fields_of_study ( --possible types
+create table fields_of_study (
     id integer constraint pk_fie primary key,
     name varchar(100) NOT NULL
 );
 
-create table majors ( -- particular field at given university
+create table majors (
     id integer constraint pk_maj primary key,
     university_id integer constraint fk_maj_uni references universities(id),
     field_id integer constraint fk_maj_fie references fields_of_study(id),
