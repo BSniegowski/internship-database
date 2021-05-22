@@ -17,5 +17,8 @@ drop table if exists employee_search cascade;
 drop function if exists isInRange(salary numeric(9,2), id integer);
 drop function if exists notEmployedThen(time_of_rec date, recommended integer, role integer);
 drop function if exists companyOfRole(role integer);
-drop function if exists employedThen(time_of_rec date, recommender integer, role integer)
+drop function if exists employedThen(time_of_rec date, recommender integer, role integer);
+drop function if exists job_start(id integer);
+drop function if exists job_end(id integer);
+drop function if exists oneCompanyOneJob(employee_new integer,company_id_new integer,start_of_new_job date, end_of_new_job date);
 

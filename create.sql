@@ -11,8 +11,10 @@ drop table if exists positions cascade;
 drop table if exists roles cascade;
 drop table if exists work_places cascade;
 drop table if exists jobs cascade;
+drop table if exists historical_salaries cascade;
 drop table if exists recommendations cascade;
 drop table if exists employee_search cascade;
+drop table if exists open_close_hours cascade;
 
 
 create table cities (
@@ -94,15 +96,59 @@ create table roles (
     CHECK ( hours > 0 AND hours <= 80 )
 );
 
+create or replace function companyOfRole(role integer)
+	returns integer as
+$$
+begin
+	return
+        (select company_id
+        from roles
+        where role_id = role
+        );
+end;
+$$
+language plpgsql;
+
+
+
 create table work_places (
     id integer constraint pk_wp primary key,
     city_id integer constraint fk_wp_cit references cities(id),
     company_id integer constraint fk_wp_com references companies(id),
     street varchar(100),
-    street_number int2,
-    opening_hours time,
-    closing_hours time
+    street_number int2
 );
+
+create table open_close_hours (
+    location_id integer constraint fk_och_wp references work_places,
+    opening_hours_Mon time,
+    opening_hours_Tue time,
+    opening_hours_Wen time,
+    opening_hours_Thr time,
+    opening_hours_Fri time,
+    opening_hours_Sat time,
+    opening_hours_Sun time,
+    closing_hours_Mon time,
+    closing_hours_Tue time,
+    closing_hours_Wen time,
+    closing_hours_Thr time,
+    closing_hours_Fri time,
+    closing_hours_Sat time,
+    closing_hours_Sun time
+);
+
+create or replace function companyOfWorkPlace(place integer)
+	returns integer as
+$$
+begin
+	return
+        (select company_id
+        from work_places
+        where id = place
+        );
+end;
+$$
+language plpgsql;
 
 create or replace function isInRange(salary numeric(9,2), id integer)
 	returns bool as
@@ -115,6 +161,25 @@ end;
 $$
 language plpgsql;
 
+create or replace function oneCompanyOneJob(employee_new integer,company_id_new integer,start_of_new_job date, end_of_new_job date)
+    returns bool as
+$$
+begin
+    return
+        0 = (
+            select count(*)
+            from jobs x
+            where
+                  x.employee = employee_new
+                AND companyOfRole(x.role_id) = company_id_new
+                AND x.starting_date < end_of_new_job
+                AND x.ending_date > start_of_new_job
+            );
+end;
+$$
+language plpgsql;
+
+
 create table jobs (
     job_id integer constraint pk_j primary key,
 	role_id integer constraint fk_j_r references roles(role_id),
@@ -124,10 +189,45 @@ create table jobs (
 	unique (role_id,employee,starting_date),
 
 	ending_date date,
-	salary numeric(9,2),
+	salary numeric(9,2) not null,
 
     CHECK ( ending_date > starting_date),
-    CHECK ( isInRange(salary,role_id) )
+    CHECK ( isInRange(salary,role_id) ),
+    CHECK ( oneCompanyOneJob(employee,companyOfRole(role_id),starting_date,ending_date) ),
+    CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
+);
+
+create or replace function job_start(id integer)
+    returns date as
+$$
+begin
+	return
+        (select starting_date
+        from jobs
+        where job_id = id);
+end;
+$$
+language plpgsql;
+
+create or replace function job_end(id integer)
+    returns date as
+$$
+begin
+	return
+        (select ending_date
+        from jobs
+        where job_id = id);
+end;
+$$
+language plpgsql;
+
+--we need trigger to add records here, when salary in jobs is altered
+create table historical_salaries (
+    job_id integer constraint fk_hs_j references jobs(job_id),
+    salary numeric(9,2),
+    ending_date date not null,
+    CHECK ( ending_date >= job_start(job_id)),
+    CHECK ( ending_date <= job_end(job_id))
 );
 
 create or replace function notEmployedThen(time_of_rec date, recommended integer, role integer)
@@ -148,18 +248,7 @@ end;
 $$
 language plpgsql;
 
-create or replace function companyOfRole(role integer)
-	returns integer as
-$$
-begin
-	return
-        (select company_id
-        from roles
-        where role_id = role
-        );
-end;
-$$
-language plpgsql;
+
 
 create or replace function employedThen(time_of_rec date, recommender integer, role integer)
 	returns bool as
