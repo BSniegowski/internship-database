@@ -1,6 +1,7 @@
 drop table if exists cities cascade;
 drop table if exists people cascade;
 drop table if exists residences cascade;
+drop table if exists historical_residences cascade;
 drop table if exists companies cascade;
 drop table if exists universities cascade;
 drop table if exists fields_of_study cascade;
@@ -10,6 +11,7 @@ drop table if exists contacts cascade;
 drop table if exists positions cascade;
 drop table if exists roles cascade;
 drop table if exists work_places cascade;
+drop table if exists historical_work_places cascade;
 drop table if exists jobs cascade;
 drop table if exists historical_salaries cascade;
 drop table if exists recommendations cascade;
@@ -29,9 +31,9 @@ create table people (
 
 create table contacts (
 	id integer constraint fk_c_ppl references people(id),
-	linkedin varchar(250) unique,
-	github varchar(250) unique,
-	email varchar(250) unique,
+	linkedin varchar(100) unique,
+	github varchar(100) unique,
+	email varchar(100) unique,
     CHECK ( linkedin IS NOT NULL OR github IS NOT NULL OR email IS NOT NULL),
     CHECK ( email IS NULL OR email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$')
 );
@@ -42,6 +44,15 @@ create table residences (
     street varchar(100),
     dwelling_number int2 NOT NULL,
     flat_number int2
+);
+--trigger needed
+create table historical_residences (
+    id integer references people(id),
+    city_id integer references cities(id),
+    street varchar(100),
+    dwelling_number int2 NOT NULL,
+    flat_number int2,
+    lived_until date
 );
 
 create table universities (
@@ -75,7 +86,7 @@ create table educations (
 
 create table companies (
 	id integer constraint pk_com primary key,
-	company_name varchar(200) not null unique,
+	company_name varchar(100) not null unique,
 	headquarters integer constraint fk_com_cit references cities(id),
 	annual_revenue numeric(9,2)
 );
@@ -109,14 +120,18 @@ end;
 $$
 language plpgsql;
 
-
-
 create table work_places (
     id integer constraint pk_wp primary key,
     city_id integer constraint fk_wp_cit references cities(id),
     company_id integer constraint fk_wp_com references companies(id),
     street varchar(100),
     street_number int2
+);
+
+create table historical_work_places (
+    job_id integer references jobs(job_id),
+    place_id integer references work_places(id),
+    worked_here_till date
 );
 
 create table open_close_hours (
@@ -285,7 +300,5 @@ create table employee_search (
     role_id integer constraint fk_emp_r references roles(role_id),
     start_of_search date NOT NULL,
     end_of_search date NOT NULL,
-    premium numeric(9,2)
-    CHECK ( end_of_search >= start_of_search ),
-    CHECK ( premium > 0 )
+    CHECK ( end_of_search >= start_of_search )
 );
