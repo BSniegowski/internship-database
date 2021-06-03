@@ -41,65 +41,6 @@ create table contacts ( --one to one ?
     CHECK ( linkedin IS NOT NULL OR github IS NOT NULL )
 );
 
-create table emails ( --one to many ?
-    id integer constraint fk_c_ppl references people(id),
-    email varchar(100) unique,
-    CHECK ( email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$' )
-);
-
-create or replace function addCorporateMail() returns trigger AS $addCorporateMail$
-declare name1 varchar(100);
-declare name2 varchar(100);
-begin
-    name1 = (select name
-    from people
-    where id = new.employee);
-    name2 = (select company_name
-    from companies
-    where id = companyOfRole(new.role_id));
-    name1 = replace(name1,' ','.');
-    name2 = replace(name2,' ','.');
-    insert into emails values (new.employee,concat(name1,'@',name2,'.com'));
-    return new;
-end;
-$addCorporateMail$ LANGUAGE plpgsql;
-
-create trigger addCorporateMail after insert on jobs
-FOR EACH ROW EXECUTE PROCEDURE addCorporateMail();
-
-create or replace function universityOfMajor(major integer)
-	returns integer as
-$$
-begin
-	return
-        (select university_id
-        from majors
-        where id = major
-        );
-end;
-$$
-language plpgsql;
-
-create or replace function addUniversityMail() returns trigger AS $addUniversityMail$
-declare name1 varchar(100);
-declare name2 varchar(100);
-begin
-    name1 = (select name
-    from people
-    where id = new.student_id);
-    name2 = (select name
-    from universities
-    where id = universityOfMajor(new.major_id));
-    name1 = replace(name1,' ','.');
-    name2 = replace(name2,' ','.');
-    insert into emails values (new.student_id,concat(name1,'@',name2,'.edu'));
-    return new;
-end;
-$addUniversityMail$ LANGUAGE plpgsql;
-
-create trigger addUniversityMail after insert on educations
-FOR EACH ROW EXECUTE PROCEDURE addUniversityMail();
-
 create table residences (
     id integer constraint fk_res_ppl references people(id),
     city_id integer constraint fk_res_cit references cities(id),
@@ -404,3 +345,62 @@ create table employee_search (
     end_of_search date NOT NULL,
     CHECK ( end_of_search >= start_of_search )
 );
+
+create table emails ( --one to many ?
+    id integer constraint fk_c_ppl references people(id),
+    email varchar(100) unique,
+    CHECK ( email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$' )
+);
+
+create or replace function addCorporateMail() returns trigger AS $addCorporateMail$
+declare name1 varchar(100);
+declare name2 varchar(100);
+begin
+    name1 = (select name
+    from people
+    where id = new.employee);
+    name2 = (select company_name
+    from companies
+    where id = companyOfRole(new.role_id));
+    name1 = replace(name1,' ','.');
+    name2 = replace(name2,' ','.');
+    insert into emails values (new.employee,concat(name1,'@',name2,'.com'));
+    return new;
+end;
+$addCorporateMail$ LANGUAGE plpgsql;
+
+create trigger addCorporateMail after insert on jobs
+FOR EACH ROW EXECUTE PROCEDURE addCorporateMail();
+
+create or replace function universityOfMajor(major integer)
+	returns integer as
+$$
+begin
+	return
+        (select university_id
+        from majors
+        where id = major
+        );
+end;
+$$
+language plpgsql;
+
+create or replace function addUniversityMail() returns trigger AS $addUniversityMail$
+declare name1 varchar(100);
+declare name2 varchar(100);
+begin
+    name1 = (select name
+    from people
+    where id = new.student_id);
+    name2 = (select name
+    from universities
+    where id = universityOfMajor(new.major_id));
+    name1 = replace(name1,' ','.');
+    name2 = replace(name2,' ','.');
+    insert into emails values (new.student_id,concat(name1,'@',name2,'.edu'));
+    return new;
+end;
+$addUniversityMail$ LANGUAGE plpgsql;
+
+create trigger addUniversityMail after insert on educations
+FOR EACH ROW EXECUTE PROCEDURE addUniversityMail();
