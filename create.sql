@@ -45,7 +45,7 @@ create table residences (
     dwelling_number int2 NOT NULL,
     flat_number int2
 );
---trigger needed
+
 create table historical_residences (
     id integer references people(id),
     city_id integer references cities(id),
@@ -54,6 +54,23 @@ create table historical_residences (
     flat_number int2,
     lived_until date
 );
+
+create or replace function alterResidences() returns trigger AS $alterResidences$
+begin
+  insert into historical_residences values (old.id,old.city_id,old.street,old.dwelling_number,old.flat_number,now());
+  return new;
+end;
+$alterResidences$ LANGUAGE plpgsql;
+
+create trigger alterResidences before update on residences
+FOR EACH ROW EXECUTE PROCEDURE alterResidences();
+
+-- insert into people values (1,'A B');
+-- insert into cities values (1,'New City');
+-- insert into residences values (1,1,'A',1,null);
+-- update residences
+-- set flat_number = 1
+-- where dwelling_number = 1;
 
 create table universities (
     id integer constraint pk_uni primary key,
@@ -128,11 +145,6 @@ create table work_places (
     street_number int2
 );
 
-create table historical_work_places (
-    job_id integer references jobs(job_id),
-    place_id integer references work_places(id),
-    worked_here_till date
-);
 
 create table open_close_hours (
     location_id integer constraint fk_och_wp references work_places,
@@ -212,6 +224,21 @@ create table jobs (
     CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
 );
 
+create table historical_work_places (
+    job_id integer references jobs(job_id),
+    place_id integer references work_places(id),
+    worked_here_till date
+);
+create or replace function alter_place_of_job() returns trigger as $alter_place_of_job$
+begin
+  insert into historical_work_places values (old.job_id,old.location_id,now());
+  return new;
+end;
+$alter_place_of_job$ LANGUAGE plpgsql;
+
+create trigger alter_place_of_job$ before update on jobs
+FOR EACH ROW EXECUTE PROCEDURE alter_place_of_job();
+
 create or replace function job_start(id integer)
     returns date as
 $$
@@ -236,14 +263,23 @@ end;
 $$
 language plpgsql;
 
---we need trigger to add records here, when salary in jobs is altered
 create table historical_salaries (
     job_id integer constraint fk_hs_j references jobs(job_id),
     salary numeric(9,2),
-    ending_date date not null,
-    CHECK ( ending_date >= job_start(job_id)),
-    CHECK ( ending_date <= job_end(job_id))
+    until date not null,
+    CHECK ( until >= job_start(job_id)),
+    CHECK ( until <= job_end(job_id))
 );
+
+create or replace function alterSalaries() returns trigger AS $alterSalaries$
+begin
+  insert into historical_salaries values (old.job_id,old.salary,now());
+  return new;
+end;
+$alterSalaries$ LANGUAGE plpgsql;
+
+create trigger alterSalaries before update on jobs
+FOR EACH ROW EXECUTE PROCEDURE alterSalaries();
 
 create or replace function notEmployedThen(time_of_rec date, recommended integer, role integer)
 	returns bool as
