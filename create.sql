@@ -8,6 +8,7 @@ drop table if exists fields_of_study cascade;
 drop table if exists majors cascade;
 drop table if exists educations cascade;
 drop table if exists contacts cascade;
+drop table if exists emails cascade;
 drop table if exists positions cascade;
 drop table if exists roles cascade;
 drop table if exists work_places cascade;
@@ -29,14 +30,75 @@ create table people (
 	name varchar(100) NOT NULL
 );
 
-create table contacts (
-	id integer constraint fk_c_ppl references people(id),
+--not sure if this table is needed at all:
+    --hard fill with reasonable data
+    --there are no interesting rules,triggers etc associated with it
+create table contacts ( --one to one ?
+	id integer constraint fk_c_ppl references people(id) unique,
 	linkedin varchar(100) unique,
 	github varchar(100) unique,
-	email varchar(100) unique,
-    CHECK ( linkedin IS NOT NULL OR github IS NOT NULL OR email IS NOT NULL),
-    CHECK ( email IS NULL OR email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$')
+
+    CHECK ( linkedin IS NOT NULL OR github IS NOT NULL )
 );
+
+create table emails ( --one to many ?
+    id integer constraint fk_c_ppl references people(id),
+    email varchar(100) unique,
+    CHECK ( email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$' )
+);
+
+create or replace function addCorporateMail() returns trigger AS $addCorporateMail$
+declare name1 varchar(100);
+declare name2 varchar(100);
+begin
+    name1 = (select name
+    from people
+    where id = new.employee);
+    name2 = (select company_name
+    from companies
+    where id = companyOfRole(new.role_id));
+    name1 = replace(name1,' ','.');
+    name2 = replace(name2,' ','.');
+    insert into emails values (new.employee,concat(name1,'@',name2,'.com'));
+    return new;
+end;
+$addCorporateMail$ LANGUAGE plpgsql;
+
+create trigger addCorporateMail after insert on jobs
+FOR EACH ROW EXECUTE PROCEDURE addCorporateMail();
+
+create or replace function universityOfMajor(major integer)
+	returns integer as
+$$
+begin
+	return
+        (select university_id
+        from majors
+        where id = major
+        );
+end;
+$$
+language plpgsql;
+
+create or replace function addUniversityMail() returns trigger AS $addUniversityMail$
+declare name1 varchar(100);
+declare name2 varchar(100);
+begin
+    name1 = (select name
+    from people
+    where id = new.student_id);
+    name2 = (select name
+    from universities
+    where id = universityOfMajor(new.major_id));
+    name1 = replace(name1,' ','.');
+    name2 = replace(name2,' ','.');
+    insert into emails values (new.student_id,concat(name1,'@',name2,'.edu'));
+    return new;
+end;
+$addUniversityMail$ LANGUAGE plpgsql;
+
+create trigger addUniversityMail after insert on educations
+FOR EACH ROW EXECUTE PROCEDURE addUniversityMail();
 
 create table residences (
     id integer constraint fk_res_ppl references people(id),
@@ -231,8 +293,10 @@ create table historical_work_places (
 );
 create or replace function alter_place_of_job() returns trigger as $alter_place_of_job$
 begin
-  insert into historical_work_places values (old.job_id,old.location_id,now());
-  return new;
+    if old.location_id != new.location_id
+    then insert into historical_work_places values (old.job_id,old.location_id,now());
+    end if;
+    return new;
 end;
 $alter_place_of_job$ LANGUAGE plpgsql;
 
@@ -273,8 +337,10 @@ create table historical_salaries (
 
 create or replace function alterSalaries() returns trigger AS $alterSalaries$
 begin
-  insert into historical_salaries values (old.job_id,old.salary,now());
-  return new;
+    if old.salary != new.salary
+    then insert into historical_salaries values (old.job_id,old.salary,now());
+    end if;
+    return new;
 end;
 $alterSalaries$ LANGUAGE plpgsql;
 
