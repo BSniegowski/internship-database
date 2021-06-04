@@ -17,6 +17,7 @@ drop table if exists jobs cascade;
 drop table if exists historical_salaries cascade;
 drop table if exists recommendations cascade;
 drop table if exists employee_search cascade;
+drop table if exists job_offers cascade;
 drop table if exists open_close_hours cascade;
 
 
@@ -29,9 +30,8 @@ create or replace function delFromCities() returns trigger AS $delFromCities$
 begin
   delete from companies where companies.headquarters = old.id;
   delete from residences where residences.city_id = old.id;
-  delete from historical_residences where historical_residences.id = old.id;
+  delete from historical_residences where historical_residences.city_id = old.id;
   delete from work_places where work_places.city_id = old.id;
-  delete from universities where universities.city_id = old.id;
   return old;
 end;
 $delFromCities$ LANGUAGE plpgsql;
@@ -73,8 +73,8 @@ FOR EACH ROW EXECUTE PROCEDURE delFromPeople();
 create table residences (
     person_id integer constraint fk_res_ppl references people(id),
     city_id integer constraint fk_res_cit references cities(id),
-    street varchar(100),
-    dwelling_number int2 NOT NULL,
+    street varchar(100) not null,
+    dwelling_number int2 not null,
     flat_number int2
 );
 
@@ -94,20 +94,14 @@ begin
 end;
 $alterResidences$ LANGUAGE plpgsql;
 
-create trigger alterResidences before update on residences
+create trigger alterResidences after update on residences
 FOR EACH ROW EXECUTE PROCEDURE alterResidences();
 
--- insert into people values (1,'A B');
--- insert into cities values (1,'New City');
--- insert into residences values (1,1,'A',1,null);
--- update residences
--- set flat_number = 1
--- where dwelling_number = 1;
 
 create table universities (
     id integer constraint pk_uni primary key,
-    name varchar(100) NOT NULL,
-    city_id integer constraint fk_uni_cit references cities(id)
+    name varchar(100) NOT NULL
+--     city_id integer constraint fk_uni_cit references cities(id)
 );
 
 create or replace function delFromUni() returns trigger AS $delFromUni$
@@ -157,11 +151,33 @@ create table educations (
     major_id integer constraint fk_e_maj references majors(id),
     primary key (student_id,major_id),
     degree varchar(8),
-    start_of_studying date NOT NULL,
-    end_of_studying date,
+    start_of_studying date NOT NULL default now(),
+    end_of_studying date default null,
     CHECK ( degree = 'none' OR degree = 'bachelor' OR degree = 'master' OR degree = 'PhD'),
     CHECK ( end_of_studying > start_of_studying )
 );
+
+create or replace function defaultEduEnd() returns trigger AS $defaultEduEnd$
+begin
+
+    if new.end_of_studying is not null then
+        return new;
+    end if;
+
+    case
+        when new.degree = 'none' then new.end_of_studying = new.start_of_studying + 3 * interval '1 year';
+        when new.degree = 'bachelor' OR new.degree = 'master' then new.end_of_studying = new.start_of_studying + 5 * interval '1 year';
+        else new.end_of_studying = new.start_of_studying + 9 * interval '1 year';
+    end case;
+    return new;
+end;
+$defaultEduEnd$ LANGUAGE plpgsql;
+create trigger defaultEduEnd before insert on educations
+FOR EACH ROW EXECUTE PROCEDURE defaultEduEnd();
+
+
+create trigger delFromMajors before delete on educations
+FOR EACH ROW EXECUTE PROCEDURE delFromMajors();
 
 create table companies (
 	id integer constraint pk_com primary key,
@@ -209,11 +225,23 @@ create table roles (
     CHECK ( hours_per_week > 0 AND hours_per_week <= 80 )
 );
 
+create or replace function updateSalary() returns trigger as $updateSalary$
+begin
+    update jobs
+    set salary = greatest(least(salary,new.salary_range_max),new.salary_range_min)
+    where role_id = old.role_id AND (ending_date >= now() OR ending_date IS NULL);
+return new;
+end;
+$updateSalary$ LANGUAGE plpgsql;
+
+create trigger updateSalary after update on roles
+FOR EACH ROW EXECUTE PROCEDURE updateSalary();
+
 create or replace function delFromRoles() returns trigger AS $delFromRoles$
 begin
   delete from jobs where jobs.role_id = old.role_id;
   delete from recommendations where recommendations.role_id = old.role_id;
-  delete from employee_search where employee_search.role_id = old.role_id;
+  delete from job_offers where job_offers.role_id = old.role_id;
   return old;
 end;
 $delFromRoles$ LANGUAGE plpgsql;
@@ -454,7 +482,7 @@ create table recommendations (
     CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
 
 );
-create table employee_search (
+create table job_offers (
     id integer constraint pk_emp primary key,
     role_id integer constraint fk_emp_r references roles(role_id),
     start_of_search date NOT NULL,
@@ -471,6 +499,7 @@ create table emails ( --one to many ?
 create or replace function addCorporateMail() returns trigger AS $addCorporateMail$
 declare name1 varchar(100);
 declare name2 varchar(100);
+declare emaill varchar(100);
 begin
     name1 = (select name
     from people
@@ -480,7 +509,8 @@ begin
     where id = companyOfRole(new.role_id));
     name1 = replace(name1,' ','.');
     name2 = replace(name2,' ','.');
-    insert into emails values (new.employee,concat(name1,'@',name2,'.com'));
+    emaill = concat(name1,'@',name2,'.com');
+    insert into emails select new.employee,emaill where not exists ( select * from emails x where x.email = emaill);
     return new;
 end;
 $addCorporateMail$ LANGUAGE plpgsql;
@@ -501,9 +531,21 @@ end;
 $$
 language plpgsql;
 
+create or replace function emailIsAvailable(emaill varchar) returns bool as
+$$
+begin
+    return 0 = (select count(*)
+    from emails
+    where email = emaill);
+end;
+$$
+language plpgsql;
+
 create or replace function addUniversityMail() returns trigger AS $addUniversityMail$
 declare name1 varchar(100);
 declare name2 varchar(100);
+declare emaill varchar(100);
+declare flag boolean;
 begin
     name1 = (select name
     from people
@@ -513,7 +555,8 @@ begin
     where id = universityOfMajor(new.major_id));
     name1 = replace(name1,' ','.');
     name2 = replace(name2,' ','.');
-    insert into emails values (new.student_id,concat(name1,'@',name2,'.edu'));
+    emaill = concat(name1,'@',name2,'.edu');
+    insert into emails select new.student_id,emaill where not exists ( select * from emails x where x.email = emaill);
     return new;
 end;
 $addUniversityMail$ LANGUAGE plpgsql;

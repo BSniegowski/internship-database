@@ -1,4 +1,3 @@
-insert into companies (id, company_name, main_country, annual_revenue) values (0, 'Exxon Mobil', 'Canada', 32568.2364);
 insert into companies (id, company_name, main_country, annual_revenue) values (1, 'Wal-Mart Stores', 'Montenegro', 81427.0791);
 insert into companies (id, company_name, main_country, annual_revenue) values (2, 'Chevron', 'Panama', 14418.4796);
 insert into companies (id, company_name, main_country, annual_revenue) values (3, 'ConocoPhillips', 'Micronesia', 46229.5309);
@@ -498,3 +497,4 @@ insert into companies (id, company_name, main_country, annual_revenue) values (4
 insert into companies (id, company_name, main_country, annual_revenue) values (497, 'Nash-Finch', 'East Timor', 38506.4393);
 insert into companies (id, company_name, main_country, annual_revenue) values (498, 'KeyCorp', 'Benin', 92258.4727);
 insert into companies (id, company_name, main_country, annual_revenue) values (499, 'Molina Healthcare', 'Liechtenstein', 79972.12);
+insert into companies (id, company_name, main_country, annual_revenue) values (500, 'Exxon Mobil', 'Canada', 32568.2364);
