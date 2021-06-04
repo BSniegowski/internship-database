@@ -25,24 +25,53 @@ create table cities (
     name varchar(100) NOT NULL
 );
 
+create or replace function delFromCities() returns trigger AS $delFromCities$
+begin
+  delete from companies where companies.headquarters = old.id;
+  delete from residences where residences.city_id = old.id;
+  delete from historical_residences where historical_residences.id = old.id;
+  delete from work_places where work_places.city_id = old.id;
+  delete from universities where universities.city_id = old.id;
+  return old;
+end;
+$delFromCities$ LANGUAGE plpgsql;
+
+create trigger delFromCities before delete on cities
+FOR EACH ROW EXECUTE PROCEDURE delFromCities();
+
 create table people (
 	id integer constraint pk_ppl primary key,
 	name varchar(100) NOT NULL
 );
 
---not sure if this table is needed at all:
-    --hard fill with reasonable data
-    --there are no interesting rules,triggers etc associated with it
-create table contacts ( --one to one ?
-	id integer constraint fk_c_ppl references people(id) unique,
-	linkedin varchar(100) unique,
-	github varchar(100) unique,
+create or replace function delFromPeople() returns trigger AS $delFromPeople$
+begin
+  delete from jobs where employee = old.id;
+  delete from educations where student_id = old.id;
+  delete from emails where person_id = old.id;
+  delete from recommendations where recommender = old.id OR recommended = old.id;
+  delete from residences where residences.person_id = old.id;
+  delete from historical_residences where historical_residences.person_id = old.id;
+  return old;
+end;
+$delFromPeople$ LANGUAGE plpgsql;
 
-    CHECK ( linkedin IS NOT NULL OR github IS NOT NULL )
-);
+create trigger delFromPeople before delete on people
+FOR EACH ROW EXECUTE PROCEDURE delFromPeople();
+
+--not sure if this table is needed at all:
+    --hard to fill with reasonable data
+    --there are no interesting rules,triggers etc associated with it
+-- create table contacts ( --one to one ?
+-- 	id integer constraint fk_c_ppl references people(id) unique,
+-- 	linkedin varchar(100) unique,
+-- 	github varchar(100) unique,
+--
+--     CHECK ( linkedin IS NOT NULL OR github IS NOT NULL )
+-- );
 
 create table residences (
-    id integer constraint fk_res_ppl references people(id),
+    person_id integer constraint fk_res_ppl references people(id),
     city_id integer constraint fk_res_cit references cities(id),
     street varchar(100),
     dwelling_number int2 NOT NULL,
@@ -50,7 +79,7 @@ create table residences (
 );
 
 create table historical_residences (
-    id integer references people(id),
+    person_id integer references people(id),
     city_id integer references cities(id),
     street varchar(100),
     dwelling_number int2 NOT NULL,
@@ -60,7 +89,7 @@ create table historical_residences (
 
 create or replace function alterResidences() returns trigger AS $alterResidences$
 begin
-  insert into historical_residences values (old.id,old.city_id,old.street,old.dwelling_number,old.flat_number,now());
+  insert into historical_residences values (old.person_id,old.city_id,old.street,old.dwelling_number,old.flat_number,now());
   return new;
 end;
 $alterResidences$ LANGUAGE plpgsql;
@@ -81,10 +110,30 @@ create table universities (
     city_id integer constraint fk_uni_cit references cities(id)
 );
 
+create or replace function delFromUni() returns trigger AS $delFromUni$
+begin
+  delete from majors where majors.university_id = old.id;
+  return old;
+end;
+$delFromUni$ LANGUAGE plpgsql;
+
+create trigger delFromUni before delete on universities
+FOR EACH ROW EXECUTE PROCEDURE delFromUni();
+
 create table fields_of_study (
     id integer constraint pk_fie primary key,
     name varchar(100) NOT NULL
 );
+
+create or replace function delFromFields() returns trigger AS $delFromFields$
+begin
+  delete from majors where majors.field_id = old.id;
+  return old;
+end;
+$delFromFields$ LANGUAGE plpgsql;
+
+create trigger delFromFields before delete on fields_of_study
+FOR EACH ROW EXECUTE PROCEDURE delFromFields();
 
 create table majors (
     id integer constraint pk_maj primary key,
@@ -92,6 +141,16 @@ create table majors (
     field_id integer constraint fk_maj_fie references fields_of_study(id),
     unique (university_id,field_id)
 );
+
+create or replace function delFromMajors() returns trigger AS $delFromMajors$
+begin
+  delete from educations where educations.major_id = old.id;
+  return old;
+end;
+$delFromMajors$ LANGUAGE plpgsql;
+
+create trigger delFromMajors before delete on majors
+FOR EACH ROW EXECUTE PROCEDURE delFromMajors();
 
 create table educations (
     student_id integer constraint fk_e_ppl references people(id),
@@ -111,21 +170,56 @@ create table companies (
 	annual_revenue numeric(9,2)
 );
 
+
+create or replace function delFromCompanies() returns trigger AS $delFromCompanies$
+begin
+  delete from roles where roles.company_id = old.id;
+  delete from work_places where work_places.company_id = old.id;
+  return old;
+end;
+$delFromCompanies$ LANGUAGE plpgsql;
+
+create trigger delFromCompanies before delete on companies
+FOR EACH ROW EXECUTE PROCEDURE delFromCompanies();
+
 create table positions (
     id integer constraint pk_pos primary key,
-    role_name varchar(100)
+    name varchar(100)
 );
+
+create or replace function delFromPositions() returns trigger AS $delFromPositions$
+begin
+  delete from roles where roles.position_id = old.id;
+  return old;
+end;
+$delFromPositions$ LANGUAGE plpgsql;
+
+create trigger delFromPositions before delete on positions
+FOR EACH ROW EXECUTE PROCEDURE delFromPositions();
 
 create table roles (
     role_id integer constraint pk_r primary key,
     salary_range_min numeric(9,2),
     salary_range_max numeric(9,2),
-    hours int2 NOT NULL,
+    hours_per_week int2 NOT NULL,
     company_id integer constraint fk_r_com references companies(id),
     position_id integer constraint fk_r_pos references positions(id),
+    unique (company_id,position_id),
     CHECK ( salary_range_max >= salary_range_min ),
-    CHECK ( hours > 0 AND hours <= 80 )
+    CHECK ( hours_per_week > 0 AND hours_per_week <= 80 )
 );
+
+create or replace function delFromRoles() returns trigger AS $delFromRoles$
+begin
+  delete from jobs where jobs.role_id = old.role_id;
+  delete from recommendations where recommendations.role_id = old.role_id;
+  delete from employee_search where employee_search.role_id = old.role_id;
+  return old;
+end;
+$delFromRoles$ LANGUAGE plpgsql;
+
+create trigger delFromRoles before delete on roles
+FOR EACH ROW EXECUTE PROCEDURE delFromRoles();
 
 create or replace function companyOfRole(role integer)
 	returns integer as
@@ -148,6 +242,17 @@ create table work_places (
     street_number int2
 );
 
+create or replace function delFromPlaces() returns trigger AS $delFromPlaces$
+begin
+  delete from jobs where jobs.location_id = old.id;
+  delete from historical_work_places where historical_work_places.place_id = old.id;
+  delete from open_close_hours where open_close_hours.location_id = old.id;
+  return old;
+end;
+$delFromPlaces$ LANGUAGE plpgsql;
+
+create trigger delFromPlaces before delete on work_places
+FOR EACH ROW EXECUTE PROCEDURE delFromPlaces();
 
 create table open_close_hours (
     location_id integer constraint fk_och_wp references work_places,
@@ -226,6 +331,17 @@ create table jobs (
     CHECK ( oneCompanyOneJob(employee,companyOfRole(role_id),starting_date,ending_date) ),
     CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
 );
+
+create or replace function delFromJobs() returns trigger AS $delFromJobs$
+begin
+  delete from historical_work_places where historical_work_places.job_id = old.job_id;
+  delete from historical_salaries where historical_salaries.job_id = old.job_id;
+  return old;
+end;
+$delFromJobs$ LANGUAGE plpgsql;
+
+create trigger delFromJobs before delete on jobs
+FOR EACH ROW EXECUTE PROCEDURE delFromJobs();
 
 create table historical_work_places (
     job_id integer references jobs(job_id),
@@ -347,7 +463,7 @@ create table employee_search (
 );
 
 create table emails ( --one to many ?
-    id integer constraint fk_c_ppl references people(id),
+    person_id integer constraint fk_c_ppl references people(id),
     email varchar(100) unique,
     CHECK ( email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$' )
 );
