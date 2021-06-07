@@ -98,7 +98,7 @@ insert into work_places (id, city_id, company_id, street, street_number) values 
 insert into work_places (id, city_id, company_id, street, street_number) values (98, 528, 33, 'DUDLEY TERRACE', 173);
 insert into work_places (id, city_id, company_id, street, street_number) values (99, 166, 33, 'PELZER AVENUE', 112);
 insert into work_places (id, city_id, company_id, street, street_number) values (100, 107, 34, 'VILLAGE CAMPUS CIRCLE', 28);
-insert into work_places (id, city_id, company_id, street, street_number) values (101, 11, 34, 'PENSACOLA  PLACE', 205);
+insert into work_places (id, city_id, company_id, street, street_number) values (101, 11, 34, 'PENSACOLA PLACE', 205);
 insert into work_places (id, city_id, company_id, street, street_number) values (102, 337, 34, 'ASHLAND AVENUE', 2);
 insert into work_places (id, city_id, company_id, street, street_number) values (103, 320, 35, 'PARLOR PLACE', 49);
 insert into work_places (id, city_id, company_id, street, street_number) values (104, 159, 35, 'BARRINEAU PLACE', 416);
@@ -843,7 +843,7 @@ insert into work_places (id, city_id, company_id, street, street_number) values 
 insert into work_places (id, city_id, company_id, street, street_number) values (843, 296, 281, 'THAYER TERRACE', 188);
 insert into work_places (id, city_id, company_id, street, street_number) values (844, 170, 282, 'JAMESTON AVENUE', 48);
 insert into work_places (id, city_id, company_id, street, street_number) values (845, 213, 282, 'BEDFORD WAY', 40);
-insert into work_places (id, city_id, company_id, street, street_number) values (846, 111, 282, 'PENSACOLA  PLACE', 38);
+insert into work_places (id, city_id, company_id, street, street_number) values (846, 111, 282, 'PENSACOLA PLACE', 38);
 insert into work_places (id, city_id, company_id, street, street_number) values (847, 137, 283, 'HOBART COURT', 61);
 insert into work_places (id, city_id, company_id, street, street_number) values (848, 159, 283, 'ESTAFANA WAY', 24);
 insert into work_places (id, city_id, company_id, street, street_number) values (849, 343, 283, 'CAMINO DEL REY DRIVE', 88);
