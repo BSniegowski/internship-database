@@ -20,6 +20,12 @@ drop table if exists employee_search cascade;
 drop table if exists job_offers cascade;
 drop table if exists open_close_hours cascade;
 
+create index idx_work_places_city_id on work_places(city_id); 
+create index idx_jobs_location_id on jobs(location_id); 
+create index idx_residences_city_id on residences(city_id); 
+create index idx_job_offers on job_offers(role_id); 
+create index idx_salary_range on roles(salary_range_min, salary_range_max); 
+
 
 create table cities (
     id integer constraint pk_cit primary key,
@@ -75,7 +81,8 @@ create table residences (
     city_id integer constraint fk_res_cit references cities(id),
     street varchar(100) not null,
     dwelling_number int2 not null,
-    flat_number int2
+    flat_number int2,
+    CHECK (street ~ '^([A-Z]+\s)*[A-Z]+$')
 );
 
 create table historical_residences (
@@ -84,7 +91,8 @@ create table historical_residences (
     street varchar(100),
     dwelling_number int2 NOT NULL,
     flat_number int2,
-    lived_until date
+    lived_until date,
+    CHECK (street ~ '^([A-Z]+\s)*[A-Z]+$')
 );
 
 create or replace function alterResidences() returns trigger AS $alterResidences$
@@ -263,7 +271,8 @@ create table work_places (
     city_id integer constraint fk_wp_cit references cities(id),
     company_id integer constraint fk_wp_com references companies(id),
     street varchar(100),
-    street_number int2 not null
+    street_number int2 not null,
+    CHECK (street ~ '^([A-Z]+\s)*[A-Z]+$')
 );
 
 create or replace function delFromPlaces() returns trigger AS $delFromPlaces$
