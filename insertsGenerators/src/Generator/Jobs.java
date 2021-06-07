@@ -1,7 +1,7 @@
 import java.util.Random;
 
 public class Jobs {
-    static int MANY = 10000;
+    static int MANY = 2000;
     static int roles = 3991;
     static int people = 5000;
     public static void main(String[] args) {
