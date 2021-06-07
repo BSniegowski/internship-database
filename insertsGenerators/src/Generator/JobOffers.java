@@ -1,16 +1,16 @@
-package Generator;
 
 import java.util.Random;
 
 
 public class JobOffers {
     static int MANY = 1000;
+    static int roles = 3991;
     public static void main(String[] args) {
         //System.out.println(citiesArray.length);
         for(int i=1;i<MANY;i++){
             Random random1 = new Random();
 
-            int r1 = random1.nextInt(53) + 1;
+            int r1 = random1.nextInt(roles) + 1;
             int year = random1.nextInt(6) + 2015;
             int month = random1.nextInt(12) + 1;
             int day = random1.nextInt(28) + 1;

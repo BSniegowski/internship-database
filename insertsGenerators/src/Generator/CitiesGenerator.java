@@ -1,4 +1,3 @@
-package Generator;
 
 public class CitiesGenerator {
 

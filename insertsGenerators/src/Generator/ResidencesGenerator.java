@@ -1,4 +1,3 @@
-package Generator;
 import java.util.Random;
 
 public class ResidencesGenerator {

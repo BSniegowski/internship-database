@@ -338,6 +338,30 @@ end;
 $$
 language plpgsql;
 
+create or replace function minRangeForRole(role integer)
+    returns numeric(9,2) as
+$$
+begin
+    return
+        (select salary_range_min
+        from roles
+        where role_id = role);
+end;
+$$
+language plpgsql;
+
+create or replace function maxRangeForRole(role integer)
+    returns numeric(9,2) as
+$$
+begin
+    return
+        (select salary_range_max
+        from roles
+        where role_id = role);
+end;
+$$
+language plpgsql;
+
 --index?
 create table jobs (
     job_id integer constraint pk_j primary key,
@@ -350,11 +374,23 @@ create table jobs (
 	ending_date date,
 	salary numeric(9,2) not null,
 
-    CHECK ( ending_date > starting_date),
-    CHECK ( isInRange(salary,role_id) ),
-    CHECK ( oneCompanyOneJob(employee,companyOfRole(role_id),starting_date,ending_date) ),
-    CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
+    constraint jobs1 CHECK ( ending_date >= starting_date),
+    constraint jobs2 CHECK ( isInRange(salary,role_id) ),
+    constraint jobs3 CHECK ( oneCompanyOneJob(employee,companyOfRole(role_id),starting_date,ending_date) ),
+    constraint jobs4 CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
 );
+
+create or replace function jobChange() returns trigger AS $jobChange$
+begin
+    update jobs
+    set ending_date = new.starting_date
+    where employee = new.employee AND companyofrole(role_id) = companyofrole(new.role_id) AND ending_date >= new.starting_date;
+  return old;
+end;
+$jobChange$ LANGUAGE plpgsql;
+
+create trigger jobChange before insert on jobs
+FOR EACH ROW EXECUTE PROCEDURE jobChange();
 
 create or replace function delFromJobs() returns trigger AS $delFromJobs$
 begin
@@ -506,11 +542,12 @@ begin
     from companies
     where id = companyOfRole(new.role_id));
     name1 = replace(name1,' ','.');
-    name2 = replace(name2,' ','.');
+    name2 = replace(name2,' ','-');
+    name2 = replace(name2,'.','-');
     emaill = concat(name1,'@',name2,'.com');
     insert into emails select new.employee,emaill where not exists ( select * from emails x where x.email = emaill);
     return new;
-end;
+end
 $addCorporateMail$ LANGUAGE plpgsql;
 
 create trigger addCorporateMail after insert on jobs
