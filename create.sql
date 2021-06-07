@@ -395,8 +395,11 @@ create or replace function jobChange() returns trigger AS $jobChange$
 begin
     update jobs
     set ending_date = new.starting_date
-    where employee = new.employee AND companyofrole(role_id) = companyofrole(new.role_id) AND ending_date >= new.starting_date;
-  return old;
+    where employee = new.employee AND companyofrole(role_id) = companyofrole(new.role_id) AND starting_date <= new.starting_date AND ending_date >= new.starting_date;
+    if 0 < (select count(*) from jobs where jobs.employee = new.employee AND starting_date <= new.ending_date AND new.starting_date <= ending_date)
+    then new = null;
+    end if;
+  return new;
 end;
 $jobChange$ LANGUAGE plpgsql;
 
