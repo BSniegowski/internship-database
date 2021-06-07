@@ -71,7 +71,7 @@ FOR EACH ROW EXECUTE PROCEDURE delFromPeople();
 -- );
 
 create table residences (
-    person_id integer constraint fk_res_ppl references people(id),
+    person_id integer constraint fk_res_ppl references people(id) unique,
     city_id integer constraint fk_res_cit references cities(id),
     street varchar(100) not null,
     dwelling_number int2 not null,
@@ -97,10 +97,10 @@ $alterResidences$ LANGUAGE plpgsql;
 create trigger alterResidences after update on residences
 FOR EACH ROW EXECUTE PROCEDURE alterResidences();
 
-
+--index on names?
 create table universities (
     id integer constraint pk_uni primary key,
-    name varchar(100) NOT NULL
+    name varchar(100) NOT NULL unique
 --     city_id integer constraint fk_uni_cit references cities(id)
 );
 
@@ -116,7 +116,7 @@ FOR EACH ROW EXECUTE PROCEDURE delFromUni();
 
 create table fields_of_study (
     id integer constraint pk_fie primary key,
-    name varchar(100) NOT NULL
+    name varchar(100) NOT NULL unique
 );
 
 create or replace function delFromFields() returns trigger AS $delFromFields$
@@ -149,7 +149,7 @@ FOR EACH ROW EXECUTE PROCEDURE delFromMajors();
 create table educations (
     student_id integer constraint fk_e_ppl references people(id),
     major_id integer constraint fk_e_maj references majors(id),
-    primary key (student_id,major_id),
+    unique (student_id,major_id),
     degree varchar(8),
     start_of_studying date NOT NULL default now(),
     end_of_studying date default null,
@@ -175,10 +175,6 @@ $defaultEduEnd$ LANGUAGE plpgsql;
 create trigger defaultEduEnd before insert on educations
 FOR EACH ROW EXECUTE PROCEDURE defaultEduEnd();
 
-
-create trigger delFromMajors before delete on educations
-FOR EACH ROW EXECUTE PROCEDURE delFromMajors();
-
 create table companies (
 	id integer constraint pk_com primary key,
 	company_name varchar(100) not null unique,
@@ -200,7 +196,7 @@ FOR EACH ROW EXECUTE PROCEDURE delFromCompanies();
 
 create table positions (
     id integer constraint pk_pos primary key,
-    name varchar(100)
+    name varchar(100) unique
 );
 
 create or replace function delFromPositions() returns trigger AS $delFromPositions$
@@ -267,7 +263,7 @@ create table work_places (
     city_id integer constraint fk_wp_cit references cities(id),
     company_id integer constraint fk_wp_com references companies(id),
     street varchar(100),
-    street_number int2
+    street_number int2 not null
 );
 
 create or replace function delFromPlaces() returns trigger AS $delFromPlaces$
@@ -342,7 +338,7 @@ end;
 $$
 language plpgsql;
 
-
+--index?
 create table jobs (
     job_id integer constraint pk_j primary key,
 	role_id integer constraint fk_j_r references roles(role_id),
@@ -415,7 +411,7 @@ language plpgsql;
 create table historical_salaries (
     job_id integer constraint fk_hs_j references jobs(job_id),
     salary numeric(9,2),
-    until date not null,
+    until date,
     CHECK ( until >= job_start(job_id)),
     CHECK ( until <= job_end(job_id))
 );
@@ -492,9 +488,11 @@ create table job_offers (
 
 create table emails ( --one to many ?
     person_id integer constraint fk_c_ppl references people(id),
-    email varchar(100) unique,
+    email varchar(100) unique not null,
     CHECK ( email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$' )
 );
+--unfortunately not faster
+--create index idx_emails_email on emails using btree (email);
 
 create or replace function addCorporateMail() returns trigger AS $addCorporateMail$
 declare name1 varchar(100);
@@ -531,21 +529,20 @@ end;
 $$
 language plpgsql;
 
-create or replace function emailIsAvailable(emaill varchar) returns bool as
-$$
-begin
-    return 0 = (select count(*)
-    from emails
-    where email = emaill);
-end;
-$$
-language plpgsql;
+-- create or replace function emailIsAvailable(emaill varchar) returns bool as
+-- $$
+-- begin
+--     return 0 = (select count(*)
+--     from emails
+--     where email = emaill);
+-- end;
+-- $$
+-- language plpgsql;
 
 create or replace function addUniversityMail() returns trigger AS $addUniversityMail$
 declare name1 varchar(100);
 declare name2 varchar(100);
 declare emaill varchar(100);
-declare flag boolean;
 begin
     name1 = (select name
     from people
