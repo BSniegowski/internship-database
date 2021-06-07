@@ -331,24 +331,6 @@ end;
 $$
 language plpgsql;
 
-create or replace function oneCompanyOneJob(employee_new integer,company_id_new integer,start_of_new_job date, end_of_new_job date)
-    returns bool as
-$$
-begin
-    return
-        0 = (
-            select count(*)
-            from jobs x
-            where
-                  x.employee = employee_new
-                AND companyOfRole(x.role_id) = company_id_new
-                AND x.starting_date < end_of_new_job
-                AND x.ending_date > start_of_new_job
-            );
-end;
-$$
-language plpgsql;
-
 create or replace function minRangeForRole(role integer)
     returns numeric(9,2) as
 $$
@@ -387,9 +369,34 @@ create table jobs (
 
     constraint jobs1 CHECK ( ending_date >= starting_date),
     constraint jobs2 CHECK ( isInRange(salary,role_id) ),
-    constraint jobs3 CHECK ( oneCompanyOneJob(employee,companyOfRole(role_id),starting_date,ending_date) ),
+    --job3 moved to trigger to disable this check on update when it should not be executed
+    --constraint jobs3 CHECK ( oneCompanyOneJob(employee,companyOfRole(role_id),starting_date,ending_date) ),
     constraint jobs4 CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
 );
+
+create or replace function oneCompanyOneJob()
+    returns trigger as
+$$
+    --employee_new integer,company_id_new integer,start_of_new_job date, end_of_new_job date
+begin
+    if
+        0 != (
+            select count(*)
+            from jobs x
+            where
+                  x.employee = new.employee
+                AND companyOfRole(x.role_id) = companyofrole(new.role_id)
+                AND x.starting_date < new.ending_date
+                AND x.ending_date > new.starting_date
+            )
+    then RAISE EXCEPTION 'one company one job';
+    end if;
+    return new;
+end;
+$$
+language plpgsql;
+create trigger oneCompanyOneJob before insert on jobs
+FOR EACH ROW EXECUTE PROCEDURE oneCompanyOneJob();
 
 create or replace function jobChange() returns trigger AS $jobChange$
 begin
@@ -461,9 +468,7 @@ language plpgsql;
 create table historical_salaries (
     job_id integer constraint fk_hs_j references jobs(job_id),
     salary numeric(9,2),
-    until date,
-    CHECK ( until >= job_start(job_id)),
-    CHECK ( until <= job_end(job_id))
+    until date
 );
 
 create or replace function alterSalaries() returns trigger AS $alterSalaries$
