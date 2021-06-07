@@ -528,6 +528,7 @@ create table recommendations (
 create table job_offers (
     id integer constraint pk_emp primary key,
     role_id integer constraint fk_emp_r references roles(role_id),
+    work_place_id integer references work_places(id),
     start_of_search date NOT NULL,
     end_of_search date NOT NULL,
     CHECK ( end_of_search >= start_of_search )
