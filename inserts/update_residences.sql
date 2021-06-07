@@ -2915,7 +2915,7 @@ update residences
 set city_id = 157, street = 'CHILTON COURT', dwelling_number = 2, flat_number = 8
 where person_id = 4860
 update residences
-set city_id = 371, street = 'PENSACOLA  PLACE', dwelling_number = 71, flat_number = 18
+set city_id = 371, street = 'PENSACOLA PLACE', dwelling_number = 71, flat_number = 18
 where person_id = 4865
 update residences
 set city_id = 590, street = 'McALPIN STREET', dwelling_number = 522, flat_number = null

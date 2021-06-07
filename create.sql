@@ -84,7 +84,7 @@ create table residences (
     street varchar(100) not null,
     dwelling_number int2 not null,
     flat_number int2
-    --CHECK (street ~ '^([A-Z]+\s)*[A-Z]+$')
+    CHECK (street ~ '^([\dA-Za-z''\.]+\s)*[\dA-Za-z''\.]+$')
 );
 
 create table historical_residences (
@@ -94,7 +94,7 @@ create table historical_residences (
     dwelling_number int2 NOT NULL,
     flat_number int2,
     lived_until date
-    --CHECK (street ~ '^([A-Z]+\s)*[A-Z]+$')
+    CHECK (street ~ '^([\dA-Za-z''\.]+\s)*[\dA-Za-z''\.]+$')
 );
 
 create or replace function alterResidences() returns trigger AS $alterResidences$
@@ -274,7 +274,7 @@ create table work_places (
     company_id integer constraint fk_wp_com references companies(id),
     street varchar(100),
     street_number int2 not null
-    --CHECK (street ~ '^([A-Z]+\s)*[A-Z]+$')
+    CHECK (street ~ '^([\dA-Za-z''\.]+\s)*[\dA-Za-z''\.]+$') 
 );
 
 create or replace function delFromPlaces() returns trigger AS $delFromPlaces$

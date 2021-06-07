@@ -530,7 +530,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (530, 467, 'BLACK BEAR LANE', 115, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (531, 607, 'FAIR OAK TERRACE', 125, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (532, 520, 'SEVEN OAKS LANE', 4, null);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (533, 544, 'ALBEMARLE  AVENUE', 485, 59);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (533, 544, 'ALBEMARLE AVENUE', 485, 59);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (534, 61, 'EDENTON TERRACE', 50, 1);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (535, 647, 'SYCAMORE AVENUE', 99, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (536, 292, 'MARDELL LANE', 93, 9);
@@ -958,7 +958,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (958, 400, 'WOODLAWN AVENUE', 19, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (959, 10, 'SAN MARIA STREET', 137, 24);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (960, 357, 'PLANK STREET', 9, null);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (961, 356, 'PENSACOLA  PLACE', 14, 18);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (961, 356, 'PENSACOLA PLACE', 14, 18);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (962, 607, 'OAKLAND COURT', 179, 44);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (963, 220, 'BATALLY COURT', 12, 4);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (964, 544, 'MIDORA TERRACE', 71, 78);
@@ -1004,7 +1004,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1004, 366, 'VENTURA COURT', 90, 68);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1005, 9, 'LANCE COURT', 26, 30);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1006, 23, 'TRINITY PLACE', 88, null);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1007, 604, 'PENSACOLA  PLACE', 168, null);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1007, 604, 'PENSACOLA PLACE', 168, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1008, 200, 'MOYER LOOP', 71, 1);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1009, 72, 'UMBRELLA LOOP', 76, 27);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (1010, 634, 'O''HARA COURT', 358, 36);
@@ -2140,7 +2140,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2140, 482, 'BAYPOINT WAY', 59, 10);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2141, 637, 'ABDELLA WAY', 398, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2142, 186, 'WINE PALM WAY', 42, 71);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2143, 106, 'ALBEMARLE  AVENUE', 14, 19);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2143, 106, 'ALBEMARLE AVENUE', 14, 19);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2144, 335, 'MARSH COURT', 3, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2145, 565, 'DARBY PLACE', 46, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2146, 558, 'TIPTON LANE', 15, null);
@@ -2153,7 +2153,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2153, 234, 'LARCHMONT COURT', 51, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2154, 144, 'EDWARDS LANE', 54, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2155, 589, 'BOWEN TERRACE', 109, 7);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2156, 13, 'ALBEMARLE  AVENUE', 28, 16);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2156, 13, 'ALBEMARLE AVENUE', 28, 16);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2157, 427, 'CLUSTER COURT', 55, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2158, 206, 'ARJAY COURT', 118, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (2159, 139, 'ZANZIBAR PLACE', 22, 5);
@@ -4069,7 +4069,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4069, 32, 'CHURCHILL DOWNS', 710, 2);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4070, 381, 'MCDOWELL DRIVE', 171, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4071, 362, 'BELCHERRY LOOP', 146, null);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4072, 275, 'PENSACOLA  PLACE', 101, null);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4072, 275, 'PENSACOLA PLACE', 101, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4073, 399, 'PINELAND TERRACE', 40, 2);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4074, 51, 'ADDISON AVENUE', 155, 12);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4075, 443, 'MONCAYO AVENUE', 119, null);
@@ -4467,7 +4467,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4467, 459, 'FIRESIDE AVENUE', 1, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4468, 198, 'NORLAND AVENUE', 31, 1);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4469, 51, 'JUAREZ WAY', 264, null);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4470, 542, 'ALBEMARLE  AVENUE', 314, null);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4470, 542, 'ALBEMARLE AVENUE', 314, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4471, 219, 'EMMALEE PLACE', 335, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4472, 485, 'EASTOVER TERRACE', 238, 2);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4473, 420, 'NOTCH AVENUE', 96, null);
@@ -4484,7 +4484,7 @@ insert into residences (person_id, city_id, street, dwelling_number, flat_number
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4484, 25, 'MADISON LANE', 357, null);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4485, 234, 'BANDO LANE', 43, 21);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4486, 407, 'BARBADOS PLACE', 526, 34);
-insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4487, 369, 'ALBEMARLE  AVENUE', 269, 23);
+insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4487, 369, 'ALBEMARLE AVENUE', 269, 23);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4488, 465, 'NASH LOOP', 3, 5);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4489, 633, 'FORTALEZA DRIVE', 12, 22);
 insert into residences (person_id, city_id, street, dwelling_number, flat_number) values (4490, 89, 'ELDERBERRY PLACE', 26, null);
