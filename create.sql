@@ -1,19 +1,23 @@
 drop table if exists cities cascade;
 drop table if exists people cascade;
 drop table if exists residences cascade;
+drop table if exists historical_residences cascade;
 drop table if exists companies cascade;
 drop table if exists universities cascade;
 drop table if exists fields_of_study cascade;
 drop table if exists majors cascade;
 drop table if exists educations cascade;
 drop table if exists contacts cascade;
+drop table if exists emails cascade;
 drop table if exists positions cascade;
 drop table if exists roles cascade;
 drop table if exists work_places cascade;
+drop table if exists historical_work_places cascade;
 drop table if exists jobs cascade;
 drop table if exists historical_salaries cascade;
 drop table if exists recommendations cascade;
 drop table if exists employee_search cascade;
+drop table if exists job_offers cascade;
 drop table if exists open_close_hours cascade;
 
 
@@ -22,38 +26,108 @@ create table cities (
     name varchar(100) NOT NULL
 );
 
+create or replace function delFromCities() returns trigger AS $delFromCities$
+begin
+  delete from companies where companies.headquarters = old.id;
+  delete from residences where residences.city_id = old.id;
+  delete from historical_residences where historical_residences.city_id = old.id;
+  delete from work_places where work_places.city_id = old.id;
+  return old;
+end;
+$delFromCities$ LANGUAGE plpgsql;
+
+create trigger delFromCities before delete on cities
+FOR EACH ROW EXECUTE PROCEDURE delFromCities();
+
 create table people (
 	id integer constraint pk_ppl primary key,
 	name varchar(100) NOT NULL
 );
 
-create table contacts (
-	id integer constraint fk_c_ppl references people(id),
-	linkedin varchar(250) unique,
-	github varchar(250) unique,
-	email varchar(250) unique,
-    CHECK ( linkedin IS NOT NULL OR github IS NOT NULL OR email IS NOT NULL),
-    CHECK ( email IS NULL OR email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$')
-);
+create or replace function delFromPeople() returns trigger AS $delFromPeople$
+begin
+  delete from jobs where employee = old.id;
+  delete from educations where student_id = old.id;
+  delete from emails where person_id = old.id;
+  delete from recommendations where recommender = old.id OR recommended = old.id;
+  delete from residences where residences.person_id = old.id;
+  delete from historical_residences where historical_residences.person_id = old.id;
+  return old;
+end;
+$delFromPeople$ LANGUAGE plpgsql;
+
+create trigger delFromPeople before delete on people
+FOR EACH ROW EXECUTE PROCEDURE delFromPeople();
+
+--not sure if this table is needed at all:
+    --hard to fill with reasonable data
+    --there are no interesting rules,triggers etc associated with it
+-- create table contacts ( --one to one ?
+-- 	id integer constraint fk_c_ppl references people(id) unique,
+-- 	linkedin varchar(100) unique,
+-- 	github varchar(100) unique,
+--
+--     CHECK ( linkedin IS NOT NULL OR github IS NOT NULL )
+-- );
 
 create table residences (
-    id integer constraint fk_res_ppl references people(id),
+    person_id integer constraint fk_res_ppl references people(id),
     city_id integer constraint fk_res_cit references cities(id),
-    street varchar(100),
-    dwelling_number int2 NOT NULL,
+    street varchar(100) not null,
+    dwelling_number int2 not null,
     flat_number int2
 );
 
+create table historical_residences (
+    person_id integer references people(id),
+    city_id integer references cities(id),
+    street varchar(100),
+    dwelling_number int2 NOT NULL,
+    flat_number int2,
+    lived_until date
+);
+
+create or replace function alterResidences() returns trigger AS $alterResidences$
+begin
+  insert into historical_residences values (old.person_id,old.city_id,old.street,old.dwelling_number,old.flat_number,now());
+  return new;
+end;
+$alterResidences$ LANGUAGE plpgsql;
+
+create trigger alterResidences after update on residences
+FOR EACH ROW EXECUTE PROCEDURE alterResidences();
+
+
 create table universities (
     id integer constraint pk_uni primary key,
-    name varchar(100) NOT NULL,
-    city_id integer constraint fk_uni_cit references cities(id)
+    name varchar(100) NOT NULL
+--     city_id integer constraint fk_uni_cit references cities(id)
 );
+
+create or replace function delFromUni() returns trigger AS $delFromUni$
+begin
+  delete from majors where majors.university_id = old.id;
+  return old;
+end;
+$delFromUni$ LANGUAGE plpgsql;
+
+create trigger delFromUni before delete on universities
+FOR EACH ROW EXECUTE PROCEDURE delFromUni();
 
 create table fields_of_study (
     id integer constraint pk_fie primary key,
     name varchar(100) NOT NULL
 );
+
+create or replace function delFromFields() returns trigger AS $delFromFields$
+begin
+  delete from majors where majors.field_id = old.id;
+  return old;
+end;
+$delFromFields$ LANGUAGE plpgsql;
+
+create trigger delFromFields before delete on fields_of_study
+FOR EACH ROW EXECUTE PROCEDURE delFromFields();
 
 create table majors (
     id integer constraint pk_maj primary key,
@@ -62,39 +136,118 @@ create table majors (
     unique (university_id,field_id)
 );
 
+create or replace function delFromMajors() returns trigger AS $delFromMajors$
+begin
+  delete from educations where educations.major_id = old.id;
+  return old;
+end;
+$delFromMajors$ LANGUAGE plpgsql;
+
+create trigger delFromMajors before delete on majors
+FOR EACH ROW EXECUTE PROCEDURE delFromMajors();
+
 create table educations (
     student_id integer constraint fk_e_ppl references people(id),
     major_id integer constraint fk_e_maj references majors(id),
     primary key (student_id,major_id),
     degree varchar(8),
-    start_of_studying date NOT NULL,
-    end_of_studying date,
+    start_of_studying date NOT NULL default now(),
+    end_of_studying date default null,
     CHECK ( degree = 'none' OR degree = 'bachelor' OR degree = 'master' OR degree = 'PhD'),
     CHECK ( end_of_studying > start_of_studying )
 );
 
+create or replace function defaultEduEnd() returns trigger AS $defaultEduEnd$
+begin
+
+    if new.end_of_studying is not null then
+        return new;
+    end if;
+
+    case
+        when new.degree = 'none' then new.end_of_studying = new.start_of_studying + 3 * interval '1 year';
+        when new.degree = 'bachelor' OR new.degree = 'master' then new.end_of_studying = new.start_of_studying + 5 * interval '1 year';
+        else new.end_of_studying = new.start_of_studying + 9 * interval '1 year';
+    end case;
+    return new;
+end;
+$defaultEduEnd$ LANGUAGE plpgsql;
+create trigger defaultEduEnd before insert on educations
+FOR EACH ROW EXECUTE PROCEDURE defaultEduEnd();
+
+
+create trigger delFromMajors before delete on educations
+FOR EACH ROW EXECUTE PROCEDURE delFromMajors();
+
 create table companies (
 	id integer constraint pk_com primary key,
-	company_name varchar(200) not null unique,
+	company_name varchar(100) not null unique,
 	headquarters integer constraint fk_com_cit references cities(id),
 	annual_revenue numeric(9,2)
 );
 
+
+create or replace function delFromCompanies() returns trigger AS $delFromCompanies$
+begin
+  delete from roles where roles.company_id = old.id;
+  delete from work_places where work_places.company_id = old.id;
+  return old;
+end;
+$delFromCompanies$ LANGUAGE plpgsql;
+
+create trigger delFromCompanies before delete on companies
+FOR EACH ROW EXECUTE PROCEDURE delFromCompanies();
+
 create table positions (
     id integer constraint pk_pos primary key,
-    role_name varchar(100)
+    name varchar(100)
 );
+
+create or replace function delFromPositions() returns trigger AS $delFromPositions$
+begin
+  delete from roles where roles.position_id = old.id;
+  return old;
+end;
+$delFromPositions$ LANGUAGE plpgsql;
+
+create trigger delFromPositions before delete on positions
+FOR EACH ROW EXECUTE PROCEDURE delFromPositions();
 
 create table roles (
     role_id integer constraint pk_r primary key,
     salary_range_min numeric(9,2),
     salary_range_max numeric(9,2),
-    hours int2 NOT NULL,
+    hours_per_week int2 NOT NULL,
     company_id integer constraint fk_r_com references companies(id),
     position_id integer constraint fk_r_pos references positions(id),
+    unique (company_id,position_id),
     CHECK ( salary_range_max >= salary_range_min ),
-    CHECK ( hours > 0 AND hours <= 80 )
+    CHECK ( hours_per_week > 0 AND hours_per_week <= 80 )
 );
+
+create or replace function updateSalary() returns trigger as $updateSalary$
+begin
+    update jobs
+    set salary = greatest(least(salary,new.salary_range_max),new.salary_range_min)
+    where role_id = old.role_id AND (ending_date >= now() OR ending_date IS NULL);
+return new;
+end;
+$updateSalary$ LANGUAGE plpgsql;
+
+create trigger updateSalary after update on roles
+FOR EACH ROW EXECUTE PROCEDURE updateSalary();
+
+create or replace function delFromRoles() returns trigger AS $delFromRoles$
+begin
+  delete from jobs where jobs.role_id = old.role_id;
+  delete from recommendations where recommendations.role_id = old.role_id;
+  delete from job_offers where job_offers.role_id = old.role_id;
+  return old;
+end;
+$delFromRoles$ LANGUAGE plpgsql;
+
+create trigger delFromRoles before delete on roles
+FOR EACH ROW EXECUTE PROCEDURE delFromRoles();
 
 create or replace function companyOfRole(role integer)
 	returns integer as
@@ -109,8 +262,6 @@ end;
 $$
 language plpgsql;
 
-
-
 create table work_places (
     id integer constraint pk_wp primary key,
     city_id integer constraint fk_wp_cit references cities(id),
@@ -118,6 +269,18 @@ create table work_places (
     street varchar(100),
     street_number int2
 );
+
+create or replace function delFromPlaces() returns trigger AS $delFromPlaces$
+begin
+  delete from jobs where jobs.location_id = old.id;
+  delete from historical_work_places where historical_work_places.place_id = old.id;
+  delete from open_close_hours where open_close_hours.location_id = old.id;
+  return old;
+end;
+$delFromPlaces$ LANGUAGE plpgsql;
+
+create trigger delFromPlaces before delete on work_places
+FOR EACH ROW EXECUTE PROCEDURE delFromPlaces();
 
 create table open_close_hours (
     location_id integer constraint fk_och_wp references work_places,
@@ -197,6 +360,34 @@ create table jobs (
     CHECK ( companyOfRole(role_id) = companyOfWorkPlace(location_id) )
 );
 
+create or replace function delFromJobs() returns trigger AS $delFromJobs$
+begin
+  delete from historical_work_places where historical_work_places.job_id = old.job_id;
+  delete from historical_salaries where historical_salaries.job_id = old.job_id;
+  return old;
+end;
+$delFromJobs$ LANGUAGE plpgsql;
+
+create trigger delFromJobs before delete on jobs
+FOR EACH ROW EXECUTE PROCEDURE delFromJobs();
+
+create table historical_work_places (
+    job_id integer references jobs(job_id),
+    place_id integer references work_places(id),
+    worked_here_till date
+);
+create or replace function alter_place_of_job() returns trigger as $alter_place_of_job$
+begin
+    if old.location_id != new.location_id
+    then insert into historical_work_places values (old.job_id,old.location_id,now());
+    end if;
+    return new;
+end;
+$alter_place_of_job$ LANGUAGE plpgsql;
+
+create trigger alter_place_of_job$ before update on jobs
+FOR EACH ROW EXECUTE PROCEDURE alter_place_of_job();
+
 create or replace function job_start(id integer)
     returns date as
 $$
@@ -221,14 +412,25 @@ end;
 $$
 language plpgsql;
 
---we need trigger to add records here, when salary in jobs is altered
 create table historical_salaries (
     job_id integer constraint fk_hs_j references jobs(job_id),
     salary numeric(9,2),
-    ending_date date not null,
-    CHECK ( ending_date >= job_start(job_id)),
-    CHECK ( ending_date <= job_end(job_id))
+    until date not null,
+    CHECK ( until >= job_start(job_id)),
+    CHECK ( until <= job_end(job_id))
 );
+
+create or replace function alterSalaries() returns trigger AS $alterSalaries$
+begin
+    if old.salary != new.salary
+    then insert into historical_salaries values (old.job_id,old.salary,now());
+    end if;
+    return new;
+end;
+$alterSalaries$ LANGUAGE plpgsql;
+
+create trigger alterSalaries before update on jobs
+FOR EACH ROW EXECUTE PROCEDURE alterSalaries();
 
 create or replace function notEmployedThen(time_of_rec date, recommended integer, role integer)
 	returns bool as
@@ -280,12 +482,84 @@ create table recommendations (
     CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
 
 );
-create table employee_search (
+create table job_offers (
     id integer constraint pk_emp primary key,
     role_id integer constraint fk_emp_r references roles(role_id),
     start_of_search date NOT NULL,
     end_of_search date NOT NULL,
-    premium numeric(9,2)
-    CHECK ( end_of_search >= start_of_search ),
-    CHECK ( premium > 0 )
+    CHECK ( end_of_search >= start_of_search )
 );
+
+create table emails ( --one to many ?
+    person_id integer constraint fk_c_ppl references people(id),
+    email varchar(100) unique,
+    CHECK ( email ~ '^[^@]+@[^@\.]+\.[^@\.][^@]*$' )
+);
+
+create or replace function addCorporateMail() returns trigger AS $addCorporateMail$
+declare name1 varchar(100);
+declare name2 varchar(100);
+declare emaill varchar(100);
+begin
+    name1 = (select name
+    from people
+    where id = new.employee);
+    name2 = (select company_name
+    from companies
+    where id = companyOfRole(new.role_id));
+    name1 = replace(name1,' ','.');
+    name2 = replace(name2,' ','.');
+    emaill = concat(name1,'@',name2,'.com');
+    insert into emails select new.employee,emaill where not exists ( select * from emails x where x.email = emaill);
+    return new;
+end;
+$addCorporateMail$ LANGUAGE plpgsql;
+
+create trigger addCorporateMail after insert on jobs
+FOR EACH ROW EXECUTE PROCEDURE addCorporateMail();
+
+create or replace function universityOfMajor(major integer)
+	returns integer as
+$$
+begin
+	return
+        (select university_id
+        from majors
+        where id = major
+        );
+end;
+$$
+language plpgsql;
+
+create or replace function emailIsAvailable(emaill varchar) returns bool as
+$$
+begin
+    return 0 = (select count(*)
+    from emails
+    where email = emaill);
+end;
+$$
+language plpgsql;
+
+create or replace function addUniversityMail() returns trigger AS $addUniversityMail$
+declare name1 varchar(100);
+declare name2 varchar(100);
+declare emaill varchar(100);
+declare flag boolean;
+begin
+    name1 = (select name
+    from people
+    where id = new.student_id);
+    name2 = (select name
+    from universities
+    where id = universityOfMajor(new.major_id));
+    name1 = replace(name1,' ','.');
+    name2 = replace(name2,' ','.');
+    emaill = concat(name1,'@',name2,'.edu');
+    insert into emails select new.student_id,emaill where not exists ( select * from emails x where x.email = emaill);
+    return new;
+end;
+$addUniversityMail$ LANGUAGE plpgsql;
+
+create trigger addUniversityMail after insert on educations
+FOR EACH ROW EXECUTE PROCEDURE addUniversityMail();
