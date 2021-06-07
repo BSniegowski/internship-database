@@ -26,6 +26,42 @@ create index idx_residences_city_id on residences(city_id);
 create index idx_job_offers on job_offers(role_id); 
 create index idx_salary_range on roles(salary_range_min, salary_range_max); 
 
+drop view if exists recommended;
+create view recommended as 
+	select recommended, time_of_recommendation 
+		from recommendations;
+		
+drop view if exists bachelors;
+create view bachelors as
+	select id, name
+		from people join educations on (id=student_id)
+		where degree='bachelor' and end_of_studying<current_date;
+		
+drop view if exists masters;
+create view masters as
+	select id, name
+		from people join educations on (id=student_id)
+		where degree='master' and end_of_studying<current_date;
+
+drop view if exists doctorals;
+create view doctorals as
+	select id, name
+		from people join educations on (id=student_id)
+		where degree='doctoral' and end_of_studying<current_date;
+
+drop view if exists workingEmployees_positions;
+create view workingEmployees_positions as
+	select employee as id, people.name, positions.name as position
+		from jobs join roles using (role_id) 
+					join positions on (position_id=positions.id) 
+					join people on (employee=people.id)
+		where ending_date<current_date;
+select * from workingEmployees_positions;
+
+--one more view showing information on job_offers like positions.name, 
+--	responding workplace, salary range, hours per week, company, ...
+
+
 
 create table cities (
     id integer constraint pk_cit primary key,
