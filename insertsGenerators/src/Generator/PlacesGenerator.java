@@ -18,8 +18,6 @@ public class PlacesGenerator {
             "XANADU LOOP", "YAGER LANE", "YANKEE CLIPPER RUN", "YARDLEY COURT", "YEAMANS PLACE", "YELLOWSTONE COURT", "YODER DRIVE", "YORKTOWN COURT", "YUCCA COURT", "ZANZIBAR PLACE", "ZEBRA LONGWING PATH", "ZENITH LOOP", "ZEST AVENUE", "ZINA LANE", "ZIPPERER WAY", "ZUMWALT LANE"};
 
 
-    static String[] open = new String[] {"6:00", "6:30", "7:00", "7:15", "7:30", "7:45", "8:00", "8:00", "8:00", "8:15", "8:20", "8:30", "8:30", "9:00", "10:00"};
-    static String[] close = new String[] {"15:00", "16:00", "17:00", "17:15", "17:30", "17:30", "17:45", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "22:00", "23:00"};
 
     public static void main(String[] args) {
         //System.out.println(citiesArray.length);
