@@ -3,9 +3,34 @@ from tkinter import *
 import pandas as pd
 
 
+class DatabaseAccess:
+    def __init__(self):
+        self.conn = psycopg2.connect(dbname='pankin610', user='pankin610',
+                                     password='12zuhabo67ZOURUG@')
+        self.cursor = self.conn.cursor()
+        self.cursor.execute(open("create.sql", "r").read())
+        generate_files = ["insert_cities.sql",
+                          "insert_companies.sql",
+                          "insert_places.sql", "insert_fields.sql", "insert_universities.sql",
+                          "insert_majors.sql",
+                          "insert_people.sql", "insert_positions.sql", "insert_roles.sql",
+                          "insert_educations.sql",
+                          "insert_hours.sql", "insert_job_offers.sql",
+                          "insert_residences.sql",
+                          "jobs.sql"]
+        generate_files = ["inserts/" + i for i in generate_files]
+        for file in generate_files:
+            gd = open(file).read()
+            if len(gd) > 0:
+                self.cursor.execute(gd)
+
+    def getCursor(self):
+        return self.cursor
+
+
 class DatabaseGui:
     def __init__(self):
-        self.initializeDatabase()
+        self.cursor = DatabaseAccess().getCursor()
         root = Tk()
         Label(root, text="The internship database.").grid(row=0)
         Label(root, text="Type a custom SQL query and press 'Execute' ").grid(row=1)
@@ -37,21 +62,6 @@ class DatabaseGui:
         res += "Studied at the same school: "
         res += str(len(self.getQueryResult("select * from universities where name='" + self.school_input.get() + "';")))
         self.output_label.config(text=res)
-
-
-    def initializeDatabase(self):
-        self.conn = psycopg2.connect(dbname='pankin610', user='pankin610',
-                                     password='12zuhabo67ZOURUG@')
-        self.cursor = self.conn.cursor()
-        self.cursor.execute(open("create.sql", "r").read())
-        generate_files = ["insert-data/insert_people.sql", "insert-data/insert_companies.sql",
-                          "insert-data/insert_fields.sql", "insert-data/insert_universities.sql",
-                          "insert-data/insert_roles.sql"]
-        for file in generate_files:
-            gd = open(file).read()
-            if len(gd) > 0:
-                self.cursor.execute(gd)
-        return self.cursor
 
     def getQueryResult(self, query):
         self.cursor.execute(query)
