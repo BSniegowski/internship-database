@@ -122,7 +122,7 @@ update residences
 set city_id = 564, street = 'BAYPOINT WAY', dwelling_number = 215, flat_number = 22
 where person_id = 205;
 update residences
-set city_id = 167, street = 'ALBEMARLE  AVENUE', dwelling_number = 19, flat_number = null
+set city_id = 167, street = 'ALBEMARLE AVENUE', dwelling_number = 19, flat_number = null
 where person_id = 210;
 update residences
 set city_id = 149, street = 'RIALTO ROAD', dwelling_number = 31, flat_number = 5
@@ -536,7 +536,7 @@ update residences
 set city_id = 452, street = 'MCLIN LANE', dwelling_number = 264, flat_number = 4
 where person_id = 895;
 update residences
-set city_id = 560, street = 'PENSACOLA  PLACE', dwelling_number = 286, flat_number = null
+set city_id = 560, street = 'PENSACOLA PLACE', dwelling_number = 286, flat_number = null
 where person_id = 900;
 update residences
 set city_id = 65, street = 'KILT TERRACE', dwelling_number = 53, flat_number = 13
@@ -1934,7 +1934,7 @@ update residences
 set city_id = 391, street = 'ROWE PLACE', dwelling_number = 2, flat_number = 94
 where person_id = 3225;
 update residences
-set city_id = 114, street = 'ALBEMARLE  AVENUE', dwelling_number = 20, flat_number = null
+set city_id = 114, street = 'ALBEMARLE AVENUE', dwelling_number = 20, flat_number = null
 where person_id = 3230;
 update residences
 set city_id = 313, street = 'CORAL WAY', dwelling_number = 50, flat_number = null
