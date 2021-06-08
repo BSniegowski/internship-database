@@ -60,7 +60,7 @@ FOR EACH ROW EXECUTE PROCEDURE delFromPeople();
 
 
 create table residences (
-    person_id integer constraint fk_res_ppl references people(id) unique,
+    person_id integer constraint fk_res_ppl references people(id) unique not null,
     city_id integer constraint fk_res_cit references cities(id),
     street varchar(100) not null,
     dwelling_number int2 not null,
@@ -203,7 +203,7 @@ create table roles (
     salary_range_min numeric(9,2),
     salary_range_max numeric(9,2),
     hours_per_week int2 NOT NULL,
-    company_id integer constraint fk_r_com references companies(id),
+    company_id integer constraint fk_r_com references companies(id) not null,
     position_id integer constraint fk_r_pos references positions(id),
     unique (company_id,position_id),
     CHECK ( salary_range_max >= salary_range_min ),
@@ -250,7 +250,7 @@ language plpgsql;
 create table work_places (
     id integer constraint pk_wp primary key,
     city_id integer constraint fk_wp_cit references cities(id),
-    company_id integer constraint fk_wp_com references companies(id),
+    company_id integer constraint fk_wp_com references companies(id) not null,
     street varchar(100),
     street_number int2 not null
     CHECK (street ~ '^([\dA-Za-z''\.]+\s)*[\dA-Za-z''\.]+$') 
@@ -269,7 +269,7 @@ create trigger delFromPlaces before delete on work_places
 FOR EACH ROW EXECUTE PROCEDURE delFromPlaces();
 
 create table open_close_hours (
-    location_id integer constraint fk_och_wp references work_places,
+    location_id integer constraint fk_och_wp references work_places unique not null,
     opening_hours_Mon time,
     opening_hours_Tue time,
     opening_hours_Wen time,
