@@ -4998,3 +4998,5 @@ insert into people (id, name) values (4997, 'Kellen PRATT');
 insert into people (id, name) values (4998, 'Caleb BALDWIN');
 insert into people (id, name) values (4999, 'Graham VEGA');
 insert into people (id, name) values (5000, 'Bridget WILKINS');
+insert into people (id, name) values (436996957, 'Pavel Sankin');
+insert into people (id, name) values (828776608, 'Morgenshtern');

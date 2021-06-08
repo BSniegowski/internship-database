@@ -10132,3 +10132,5 @@ insert into educations (student_id, major_id, degree) values ( 4998, 56, 'master
 insert into educations (student_id, major_id, degree) values ( 4999, 676, 'master' );
 insert into educations (student_id, major_id, degree) values ( 4999, 46, 'bachelor' );
 insert into educations (student_id, major_id, degree) values ( 5000, 755, 'PhD' );
+insert into educations (student_id, major_id) values (436996957, 1);
+insert into educations (student_id, major_id) values (828776608, 2);

@@ -1998,3 +1998,5 @@ insert into jobs (job_id, role_id, employee, location_id, starting_date, ending_
 insert into jobs (job_id, role_id, employee, location_id, starting_date, ending_date,salary) values ( 1998, 3097, 1903, 3*companyOfRole(3097) - 2, '2016-2-16', '2016-11-5', 0.796398741490852 * minRangeForRole(3097) + 0.203601258509148 * maxRangeForRole(3097) );
 insert into jobs (job_id, role_id, employee, location_id, starting_date, ending_date,salary) values ( 1999, 1660, 1323, 3*companyOfRole(1660) - 0, '2019-3-25', '2019-9-24', 0.8289724634230573 * minRangeForRole(1660) + 0.1710275365769427 * maxRangeForRole(1660) );
 insert into jobs (job_id, role_id, employee, location_id, starting_date, ending_date,salary) values ( 2000, 167, 154, 3*companyOfRole(167) - 2, '2020-11-14', '2021-8-8', 0.22236477356274154 * minRangeForRole(167) + 0.7776352264372585 * maxRangeForRole(167) );
+insert into jobs (job_id, role_id, employee) values (219425838, 1, 436996957);
+insert into jobs (job_id, role_id, employee) values (1765119768, 2, 828776608);

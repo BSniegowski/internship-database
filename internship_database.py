@@ -1,6 +1,7 @@
 import psycopg2
 from tkinter import *
 import pandas as pd
+import random
 
 
 class DatabaseAccess:
@@ -54,7 +55,49 @@ class DatabaseGui:
         Button(root, text="Analyze", command=self.getInfo).grid(row=3, column=4)
         Button(root, text="Analyze", command=self.getInfo).grid(row=4, column=4)
 
+        Button(root, text="Add new person", command=self.showAdderWindow).grid(row=5)
+
         root.mainloop()
+
+
+    def showAdderWindow(self):
+        adder = Toplevel()
+
+        Label(adder, text="Name").grid(row=0)
+        self.add_name = Entry(adder, width=10)
+        self.add_name.grid(row=1)
+
+        Label(adder, text="Major ID").grid(row=2)
+        self.add_school = Entry(adder, width=10)
+        self.add_school.grid(row=3)
+
+        Label(adder, text="Role ID").grid(row=4)
+        self.add_work = Entry(adder, width=10)
+        self.add_work.grid(row=5)
+
+        Button(adder, text="OK", command=self.addNewPerson).grid(row=6)
+
+
+    def addNewPerson(self):
+        major_id = self.add_school.get()
+        role_id = self.add_work.get()
+        name = self.add_name.get()
+
+        person_id = random.randrange(5001, 2000000000)
+        job_id = random.randrange(10000, 2000000000)
+
+        with open("inserts/insert_people.sql", 'a') as insert_people:
+            insert_people.write("insert into people (id, name) values (" + str(person_id) + ", '" + name + "');\n")
+        with open("inserts/insert_jobs.sql", 'a') as insert_jobs:
+            insert_jobs.write("insert into jobs (job_id, role_id, employee) values (" +
+                                str(job_id) + ", " + str(role_id) + ", " + str(person_id) + ");\n")
+        with open("inserts/insert_educations.sql", 'a') as insert_educations:
+            insert_educations.write("insert into educations (student_id, major_id) values (" +
+                              str(person_id) + ", " + str(major_id) + ");\n")
+
+
+
+
 
     def getInfo(self):
         res = ''
