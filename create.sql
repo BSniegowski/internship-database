@@ -671,4 +671,14 @@ create view workingEmployees_positions as
 					join positions on (position_id=positions.id)
 					join people on (employee=people.id)
 		where ending_date<current_date;
-select * from workingEmployees_positions;
+
+drop view if exists job_offers_info;
+create view job_offers_info as
+	select positions.name as position, cities.name as city, companies.company_name as company, 
+			salary_range_min as "min salary", salary_range_max as "max salary", hours_per_week
+		from job_offers join roles using (role_id)
+						join positions on (positions.id=position_id)
+						join companies on (company_id=companies.id)
+						join work_places on (work_place_id=work_places.id)
+						join cities on (cities.id=work_places.id);
+	
