@@ -520,61 +520,6 @@ end;
 $$
 language plpgsql;
 
-CREATE TEMPORARY TABLE joinCR as SELECT * FROM jobs x JOIN roles y USING(role_id);
-
-create or replace function randomEmployee(company integer,whenn date)
-returns integer as
-$$
-declare many integer;
-declare random_row integer;
-begin
-	many =
-		(select count(*)
-		 from joinCR
-		 where starting_date <= whenn
-		 and ending_date >= whenn
-		 and company_id = company);
-	if many = 0
-	then return null;
-	end if;
-random_row = CAST(FLOOR(random()*many) as int) + 1;
-return (select employee
-from
-	(select employee,row_number() over(order by employee) rn
-	from joinCR
-	where starting_date <= whenn
-	and ending_date >= whenn
-	and company_id = company) as inn
-where rn = random_row ) ;
-
-end
-$$
-language plpgsql;
-
-create or replace function randomRole(company integer,whenn date)
-returns integer as
-$$
-declare many integer;
-declare random_row integer;
-begin
-	many =
-		(select count(*)
-		 from roles
-		 where company_id = company);
-	if many = 0
-	then return null;
-	end if;
-random_row = CAST(FLOOR(random()*many) as int) + 1;
-return (select role_id
-from
-	(select role_id,row_number() over(order by role_id) rn
-	from roles
-	where companyOfRole(role_id) = company) as inn
-where rn = random_row ) ;
-
-end
-$$
-language plpgsql;
 
 create table recommendations (
     recommender integer constraint fk_rec_ppl references people(id),
