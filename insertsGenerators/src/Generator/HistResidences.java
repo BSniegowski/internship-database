@@ -36,7 +36,7 @@ public class HistResidences {
             }
             System.out.println("update residences");
             System.out.println("set city_id = " + r1 + ", street = '" + streetsArray[r2] + "', dwelling_number = " + street_n + ", flat_number = " + flat_n);
-            System.out.println("where person_id = " + (5*i));
+            System.out.println("where person_id = " + (5*i) + ";");
         }
     }
 

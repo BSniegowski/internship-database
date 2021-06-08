@@ -20,7 +20,7 @@ public class UpdateJobsIncludingSalariesAndWorkPlaces {
             int minus = r.nextInt(3);
             System.out.println("update jobs");
             System.out.println("set location_id = 3*((location_id+2)/3) - " + minus);
-            System.out.println("where employee = " + changed);
+            System.out.println("where employee = " + changed + ";");
         }
     }
 }
