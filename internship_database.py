@@ -55,9 +55,28 @@ class DatabaseGui:
         Button(root, text="Analyze", command=self.getInfo).grid(row=3, column=4)
         Button(root, text="Analyze", command=self.getInfo).grid(row=4, column=4)
 
-        Button(root, text="Add new person", command=self.showAdderWindow).grid(row=5)
+        Button(root, text="Add new person", command=self.showAdderWindow).grid(row=5, column=0)
+        Button(root, text="Find person", command=self.showFinderWindow).grid(row=5, column=1)
 
         root.mainloop()
+
+    def showFinderWindow(self):
+        self.finder = Toplevel()
+
+        Label(self.finder, text="Name").grid(row=0)
+        self.name_input = Entry(self.finder, width=10)
+        self.name_input.grid(row=1)
+
+        Button(self.finder, text="Get info", command=self.getPerson).grid(row=2)
+
+
+    def getPerson(self):
+        Label(self.finder, text="Jobs:").grid(row=3)
+        output = Label(self.finder)
+        output.grid(row=4)
+
+        output.config(text=str(self.getQueryResult("select * from jobs where employee=(select id from people where name='" +
+                                                   self.name_input.get() + "');")))
 
 
     def showAdderWindow(self):
@@ -77,7 +96,6 @@ class DatabaseGui:
 
         Button(adder, text="OK", command=self.addNewPerson).grid(row=6)
 
-
     def addNewPerson(self):
         major_id = self.add_school.get()
         role_id = self.add_work.get()
@@ -90,18 +108,14 @@ class DatabaseGui:
             insert_people.write("insert into people (id, name) values (" + str(person_id) + ", '" + name + "');\n")
         with open("inserts/insert_jobs.sql", 'a') as insert_jobs:
             insert_jobs.write("insert into jobs (job_id, role_id, employee) values (" +
-                                str(job_id) + ", " + str(role_id) + ", " + str(person_id) + ");\n")
+                              str(job_id) + ", " + str(role_id) + ", " + str(person_id) + ");\n")
         with open("inserts/insert_educations.sql", 'a') as insert_educations:
             insert_educations.write("insert into educations (student_id, major_id) values (" +
-                              str(person_id) + ", " + str(major_id) + ");\n")
-
-
-
+                                    str(person_id) + ", " + str(major_id) + ");\n")
 
 
     def getInfo(self):
         res = ''
-
         res += "Studied at the same school: "
         res += str(len(self.getQueryResult("select * from universities where name='" + self.school_input.get() + "';")))
         self.output_label.config(text=res)
