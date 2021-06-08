@@ -502,7 +502,6 @@ $$
 language plpgsql;
 
 
-
 create or replace function employedThen(time_of_rec date, recommender integer, role integer)
 	returns bool as
 $$
@@ -521,18 +520,90 @@ end;
 $$
 language plpgsql;
 
+CREATE TEMPORARY TABLE joinCR as SELECT * FROM jobs x JOIN roles y USING(role_id);
+
+create or replace function randomEmployee(company integer,whenn date)
+returns integer as
+$$
+declare many integer;
+declare random_row integer;
+begin
+	many =
+		(select count(*)
+		 from joinCR
+		 where starting_date <= whenn
+		 and ending_date >= whenn
+		 and company_id = company);
+	if many = 0
+	then return null;
+	end if;
+random_row = CAST(FLOOR(random()*many) as int) + 1;
+return (select employee
+from
+	(select employee,row_number() over(order by employee) rn
+	from joinCR
+	where starting_date <= whenn
+	and ending_date >= whenn
+	and company_id = company) as inn
+where rn = random_row ) ;
+
+end
+$$
+language plpgsql;
+
+create or replace function randomRole(company integer,whenn date)
+returns integer as
+$$
+declare many integer;
+declare random_row integer;
+begin
+	many =
+		(select count(*)
+		 from roles
+		 where company_id = company);
+	if many = 0
+	then return null;
+	end if;
+random_row = CAST(FLOOR(random()*many) as int) + 1;
+return (select role_id
+from
+	(select role_id,row_number() over(order by role_id) rn
+	from roles
+	where companyOfRole(role_id) = company) as inn
+where rn = random_row ) ;
+
+end
+$$
+language plpgsql;
+
 create table recommendations (
     recommender integer constraint fk_rec_ppl references people(id),
     recommended integer constraint fk_rec_ppl_2 references people(id),
     role_id integer constraint fk_rec_r references roles(role_id),
     time_of_recommendation date NOT NULL,
-    unique (recommender,recommended,role_id,time_of_recommendation),
-    CHECK ( recommender != recommended ),
+    constraint reco1 unique (recommender,recommended,role_id,time_of_recommendation),
+    constraint reco2 CHECK ( recommender != recommended ),
 
-    CHECK ( notEmployedThen(time_of_recommendation,recommended,role_id)),
-    CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
+    constraint reco3 CHECK ( notEmployedThen(time_of_recommendation,recommended,role_id)),
+    constraint reco4 CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
 
 );
+
+create or replace function ignoreBadInsertsInReco()
+    returns trigger as
+$$
+begin
+    if
+        new.recommender is null OR new.role_id is null OR new.recommender = new.recommended
+    then return null;
+    end if;
+    return new;
+end;
+$$
+language plpgsql;
+create trigger ignoreBadInsertsInReco before insert on recommendations
+FOR EACH ROW EXECUTE PROCEDURE ignoreBadInsertsInReco();
+
 create table job_offers (
     id integer constraint pk_emp primary key,
     role_id integer constraint fk_emp_r references roles(role_id),
