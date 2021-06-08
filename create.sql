@@ -502,7 +502,6 @@ $$
 language plpgsql;
 
 
-
 create or replace function employedThen(time_of_rec date, recommender integer, role integer)
 	returns bool as
 $$
@@ -521,18 +520,35 @@ end;
 $$
 language plpgsql;
 
+
 create table recommendations (
     recommender integer constraint fk_rec_ppl references people(id),
     recommended integer constraint fk_rec_ppl_2 references people(id),
     role_id integer constraint fk_rec_r references roles(role_id),
     time_of_recommendation date NOT NULL,
-    unique (recommender,recommended,role_id,time_of_recommendation),
-    CHECK ( recommender != recommended ),
+    constraint reco1 unique (recommender,recommended,role_id,time_of_recommendation),
+    constraint reco2 CHECK ( recommender != recommended ),
 
-    CHECK ( notEmployedThen(time_of_recommendation,recommended,role_id)),
-    CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
+    constraint reco3 CHECK ( notEmployedThen(time_of_recommendation,recommended,role_id)),
+    constraint reco4 CHECK ( employedThen(time_of_recommendation,recommender,role_id) )
 
 );
+
+create or replace function ignoreBadInsertsInReco()
+    returns trigger as
+$$
+begin
+    if
+        new.recommender is null OR new.role_id is null OR new.recommender = new.recommended
+    then return null;
+    end if;
+    return new;
+end;
+$$
+language plpgsql;
+create trigger ignoreBadInsertsInReco before insert on recommendations
+FOR EACH ROW EXECUTE PROCEDURE ignoreBadInsertsInReco();
+
 create table job_offers (
     id integer constraint pk_emp primary key,
     role_id integer constraint fk_emp_r references roles(role_id),
@@ -655,4 +671,14 @@ create view workingEmployees_positions as
 					join positions on (position_id=positions.id)
 					join people on (employee=people.id)
 		where ending_date<current_date;
-select * from workingEmployees_positions;
+
+drop view if exists job_offers_info;
+create view job_offers_info as
+	select positions.name as position, cities.name as city, companies.company_name as company, 
+			salary_range_min as "min salary", salary_range_max as "max salary", hours_per_week
+		from job_offers join roles using (role_id)
+						join positions on (positions.id=position_id)
+						join companies on (company_id=companies.id)
+						join work_places on (work_place_id=work_places.id)
+						join cities on (cities.id=work_places.id);
+	

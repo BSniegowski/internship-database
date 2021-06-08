@@ -1,0 +1,1 @@
+cat create.sql insert_cities.sql insert_people.sql insert_residences.sql update_residences.sql insert_companies.sql insert_universities.sql insert_fields.sql insert_majors.sql insert_educations.sql insert_positions.sql insert_roles.sql insert_places.sql insert_jobs.sql insert_job_offers.sql insert_hours.sql update_jobs.sql insert_recommendations.sql > mergedCreate.sql
